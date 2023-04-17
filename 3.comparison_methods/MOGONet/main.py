@@ -329,20 +329,6 @@ def main_model(data_path,label_path,save_path,dataset,feature_num,stop,data_type
                 print('f1_weighted_val:', f1_weighted_val)
                 print('f1_macro_val:', f1_macro_val)
             if (early_stopping.early_stop)&(epoch>=stop):
-                val_prob, val_loss = test_epoch(data_tensor_val_list, adj_val_list, labels_val_tensor, sample_weight_val,idx_dict["val"], model_dict)
-                ACC_val, AUC_val, f1_weighted_val, f1_macro_val = get_roc(labels_val_tensor.data.cpu().numpy(), val_prob[:, 1])
-                # 输出
-                f.write(f' ==  Epoch: {epoch} | val Loss: {val_loss:.6f}' + '\n')
-                f.write('ACC_val:' + str(ACC_val) + '\n')
-                f.write('auc_val:' + str(AUC_val) + '\n')
-                f.write('f1_weighted_val:' + str(f1_weighted_val) + '\n')
-                f.write('f1_macro_val:' + str(f1_macro_val) + '\n')
-
-                print(f' ==  Epoch: {epoch} | val Loss: {val_loss:.6f}')
-                print('ACC_val:', ACC_val)
-                print('auc_val:', AUC_val)
-                print('f1_weighted_val:', f1_weighted_val)
-                print('f1_macro_val:', f1_macro_val)
                 break
         f.close()
     else:
@@ -451,38 +437,6 @@ def main_model(data_path,label_path,save_path,dataset,feature_num,stop,data_type
                 print('f1_weighted_val_2:', f1_weighted_val_2)
                 print('f1_macro_val_2:', f1_macro_val_2)
             if (early_stopping.early_stop) & (epoch >= stop):
-                val_prob, val_loss = test_epoch(data_tensor_val_list, adj_val_list, labels_val_tensor,
-                                                sample_weight_val,
-                                                idx_dict["val"], model_dict)
-                acc_val, auc_weighted_ovr_val, auc_weighted_ovo_val, auc_macro_ovr_val, auc_macro_ovo_val, f1_weighted_val, f1_macro_val = get_roc_multi(labels_val_tensor.data.cpu().numpy(), val_prob)
-                y_val_new = np.array(labels_val_tensor.data.cpu().numpy()).copy()
-                y_val_new[y_val_new >= 1] = 1
-                ACC_val_2, AUC_val_2, f1_weighted_val_2, f1_macro_val_2 = get_roc(np.array(y_val_new),1 - np.array(val_prob)[:, 0])
-                #输出
-                f.write(f' ==  Epoch: {epoch} | val Loss: {val_loss:.6f}' + '\n')
-                f.write('acc_val:' + str(acc_val) + '\n')
-                f.write('auc_weighted_ovr_val:' + str(auc_weighted_ovr_val) + '\n')
-                f.write('auc_weighted_ovo_val:' + str(auc_weighted_ovo_val) + '\n')
-                f.write('auc_macro_ovr_val:' + str(auc_macro_ovr_val) + '\n')
-                f.write('auc_macro_ovo_val:' + str(auc_macro_ovo_val) + '\n')
-                f.write('f1_weighted_val:' + str(f1_weighted_val) + '\n')
-                f.write('f1_macro_val:' + str(f1_macro_val) + '\n')
-                f.write('ACC_val_2:' + str(ACC_val_2) + '\n')
-                f.write('AUC_val_2:' + str(AUC_val_2) + '\n')
-                f.write('f1_weighted_val_2:' + str(f1_weighted_val_2) + '\n')
-                f.write('f1_macro_val_2:' + str(f1_macro_val_2) + '\n')
-                print(f' ==  Epoch: {epoch} | val Loss: {val_loss:.6f}')
-                print('acc_val:', acc_val)
-                print('auc_weighted_ovr_val:', auc_weighted_ovr_val)
-                print('auc_weighted_ovo_val:', auc_weighted_ovo_val)
-                print('auc_macro_ovr_val:', auc_macro_ovr_val)
-                print('auc_macro_ovo_val:', auc_macro_ovo_val)
-                print('f1_weighted_val:', f1_weighted_val)
-                print('f1_macro_val:', f1_macro_val)
-                print('ACC_val_2:', ACC_val_2)
-                print('AUC_val_2:', AUC_val_2)
-                print('f1_weighted_val_2:', f1_weighted_val_2)
-                print('f1_macro_val_2:', f1_macro_val_2)
                 break
         f.close()
 
