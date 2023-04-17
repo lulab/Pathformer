@@ -33,3 +33,7 @@ python 3.6.9, check environments.yml for list of needed packages
 1.Activate the created conda environment
 
 ```source activate Pathformer```
+
+2.Data download and preprocessing
+
+
