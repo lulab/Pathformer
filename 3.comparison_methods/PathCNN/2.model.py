@@ -405,41 +405,7 @@ def main_model(label_path, data_path, dataset, model_name, save_path, epoch_num,
                 print('auc_val:', AUC_val)
                 print('f1_weighted_val:', f1_weighted_val)
                 print('f1_macro_val:', f1_macro_val)
-            if early_stopping.early_stop:
-                model.eval()
-                running_loss = 0.0
-                y_val = []
-                predict_val = np.zeros([len(validation_sample), label_dict.shape[0]])
-                with torch.no_grad():
-                    for index, (data, labels) in enumerate(val_loader):
-                        index += 1
-                        if index % 100 == 1:
-                            print(index)
-                        data = data
-                        labels = labels
-                        labels = labels[:, 0]
-                        logits = model(data)
-                        loss = loss_fn(logits, labels)
-                        running_loss += loss.item()
-                        y_val.extend(labels.tolist())
-                        if (index) * batch_size <= len(validation_sample):
-                            predict_val[(index - 1) * batch_size:(index) * batch_size, :] = logits.data.cpu().numpy()
-                        else:
-                            predict_val[(index - 1) * batch_size:, :] = logits.data.cpu().numpy()
-                val_loss = running_loss / index
-                ACC_val, AUC_val, f1_weighted_val, f1_macro_val = get_roc(np.array(y_val), np.array(predict_val)[:, 1])
-                # 输出
-                f.write(f' ==  Epoch: {epoch} | val Loss: {val_loss:.6f}' + '\n')
-                f.write('ACC_val:' + str(ACC_val) + '\n')
-                f.write('auc_val:' + str(AUC_val) + '\n')
-                f.write('f1_weighted_val:' + str(f1_weighted_val) + '\n')
-                f.write('f1_macro_val:' + str(f1_macro_val) + '\n')
-
-                print(f' ==  Epoch: {epoch} | val Loss: {val_loss:.6f}')
-                print('ACC_val:', ACC_val)
-                print('auc_val:', AUC_val)
-                print('f1_weighted_val:', f1_weighted_val)
-                print('f1_macro_val:', f1_macro_val)
+            if (early_stopping.early_stop) & (epoch >= stop):
                 break
         # save_ckpt(epoch, model, optimizer, epoch_loss, model_name, save_path + '/ckpt/')
         f.close()
@@ -628,59 +594,7 @@ def main_model(label_path, data_path, dataset, model_name, save_path, epoch_num,
                 print('AUC_val_2:', AUC_val_2)
                 print('f1_weighted_val_2:', f1_weighted_val_2)
                 print('f1_macro_val_2:', f1_macro_val_2)
-            if early_stopping.early_stop:
-                model.eval()
-                running_loss = 0.0
-                y_val = []
-                predict_val = np.zeros([len(validation_sample), label_dict.shape[0]])
-                with torch.no_grad():
-                    for index, (data, labels) in enumerate(val_loader):
-                        index += 1
-                        if index % 100 == 1:
-                            print(index)
-                        data = data
-                        labels = labels
-                        labels = labels[:, 0]
-                        logits = model(data)
-                        loss = loss_fn(logits, labels)
-                        running_loss += loss.item()
-                        y_val.extend(labels.tolist())
-                        if (index) * batch_size <= len(validation_sample):
-                            predict_val[(index - 1) * batch_size:(index) * batch_size, :] = logits.data.cpu().numpy()
-                        else:
-                            predict_val[(index - 1) * batch_size:, :] = logits.data.cpu().numpy()
-                val_loss = running_loss / index
-                acc_val, auc_weighted_ovr_val, auc_weighted_ovo_val, auc_macro_ovr_val, auc_macro_ovo_val, f1_weighted_val, f1_macro_val = get_roc_multi(
-                    np.array(y_val), predict_val)
-                y_val_new = np.array(y_val).copy()
-                y_val_new[y_val_new >= 1] = 1
-                ACC_val_2, AUC_val_2, f1_weighted_val_2, f1_macro_val_2 = get_roc(np.array(y_val_new),
-                                                                                  1 - np.array(predict_val)[:, 0])
-                # 输出
-                f.write(f' ==  Epoch: {epoch} | val Loss: {val_loss:.6f}' + '\n')
-                f.write('acc_val:' + str(acc_val) + '\n')
-                f.write('auc_weighted_ovr_val:' + str(auc_weighted_ovr_val) + '\n')
-                f.write('auc_weighted_ovo_val:' + str(auc_weighted_ovo_val) + '\n')
-                f.write('auc_macro_ovr_val:' + str(auc_macro_ovr_val) + '\n')
-                f.write('auc_macro_ovo_val:' + str(auc_macro_ovo_val) + '\n')
-                f.write('f1_weighted_val:' + str(f1_weighted_val) + '\n')
-                f.write('f1_macro_val:' + str(f1_macro_val) + '\n')
-                f.write('ACC_val_2:' + str(ACC_val_2) + '\n')
-                f.write('AUC_val_2:' + str(AUC_val_2) + '\n')
-                f.write('f1_weighted_val_2:' + str(f1_weighted_val_2) + '\n')
-                f.write('f1_macro_val_2:' + str(f1_macro_val_2) + '\n')
-                print(f' ==  Epoch: {epoch} | val Loss: {val_loss:.6f}')
-                print('acc_val:', acc_val)
-                print('auc_weighted_ovr_val:', auc_weighted_ovr_val)
-                print('auc_weighted_ovo_val:', auc_weighted_ovo_val)
-                print('auc_macro_ovr_val:', auc_macro_ovr_val)
-                print('auc_macro_ovo_val:', auc_macro_ovo_val)
-                print('f1_weighted_val:', f1_weighted_val)
-                print('f1_macro_val:', f1_macro_val)
-                print('ACC_val_2:', ACC_val_2)
-                print('AUC_val_2:', AUC_val_2)
-                print('f1_weighted_val_2:', f1_weighted_val_2)
-                print('f1_macro_val_2:', f1_macro_val_2)
+            if (early_stopping.early_stop) & (epoch >= stop):
                 break
         # save_ckpt(epoch, model, optimizer, epoch_loss, model_name, save_path + '/ckpt/')
         f.close()
