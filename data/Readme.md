@@ -6,6 +6,7 @@ Due to storage space limitations on Github, some key data are disclosed, and oth
 The following shows the directory tree of data folder.
 
 
+```
 +--data_gene_embedding
 | +--embedding
 | | +--RNA_all_rawdata.txt
@@ -366,3 +367,4 @@ The following shows the directory tree of data folder.
 | +--BRCA.CNV_gene.csv
 | +--BRCA.miRNA.RData
 | +--BRCA.mRNA.csv
+```
