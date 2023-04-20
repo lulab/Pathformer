@@ -77,3 +77,8 @@ For model training and test, we divided the labeled dataset into the discovery s
 **```4.Pathformer/Pathformer.py```**: Pathformer model.
 
 **```4.Pathformer/Pathformer_main.py```**: Training and test of Pathformer for classification tasks.
+
+# License and Disclaimer
+
+This tool is for research purpose and not approved for clinical use.
+The tool shall not be used for commercial purposes without permission.
