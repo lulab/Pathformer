@@ -1,2 +1,0 @@
-AUC_discovery	AUC_validation
-1.0	0.554608999563128
