@@ -55,8 +55,8 @@ python3 Pathformer_main.py \
 --modal_select_path ../Result/BRCA_stage/modal_type_all.txt \
 --gene_all ../reference/gene_all.txt \
 --gene_select ../reference/Pathformer_select_gene.txt \
---pathway_gene_w ../reference/pathway_gene_weight.npy \
---pathway_crosstalk_network  ../reference/pathway_crosstalk_network_matrix.npy \
+--pathway_gene_w ../reference/Pathformer_pathway_gene_weight.npy \
+--pathway_crosstalk_network  ../reference/Pathformer_pathway_crosstalk_network_matrix.npy \
 --data_path ../data_TCGA/3.data_gene_embedding/merge/merge_data_stage/data_all.npy \
 --label_path ../data_TCGA/2.sample_id/sample_cross_stage_new_final.txt \
 --save_path ../Result/BRCA_stage/ \
@@ -123,8 +123,8 @@ python3 Pathformer_predict.py \
 --modal_select_path ../BRCA_stage/modal_type_all.txt \
 --gene_all ../reference/gene_all.txt \
 --gene_select ../Pathformer_select_gene.txt \
---pathway_gene_w ../reference/pathway_gene_weight.npy \
---pathway_crosstalk_network  ../reference/pathway_crosstalk_network_matrix.npy \
+--pathway_gene_w ../reference/Pathformer_pathway_gene_weight.npy \
+--pathway_crosstalk_network  ../reference/Pathformer_pathway_crosstalk_network_matrix.npy \
 --data_path ../data_TCGA/3.data_gene_embedding/merge/merge_data_stage/data_all.npy \
 --label_path ../Result/BRCA_stage/label_validation.txt \
 --sample_name_path ../Result/BRCA_stage/samplename_validation.txt \
@@ -175,8 +175,8 @@ python3 Pathformer_main.py \
 --modal_select_path ../Result/EV/modal_select.txt \
 --gene_all ../reference/gene_mRNA_cfRNA.txt \
 --gene_select ../reference/Pathformer_select_gene.txt \
---pathway_gene_w ../reference/pathway_gene_weight.npy \
---pathway_crosstalk_network  ../reference/pathway_crosstalk_network_matrix.npy \
+--pathway_gene_w ../reference/Pathformer_pathway_gene_weight.npy \
+--pathway_crosstalk_network  ../reference/Pathformer_pathway_crosstalk_network_matrix.npy \
 --data_path ../data_cfRNA/3.data_gene_embedding/merge/EV/data_all.npy \
 --label_path ../data_cfRNA/2.sample_id/sample_cross_EV_new_final.txt \
 --save_path ../Result/EV/ \
