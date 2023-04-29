@@ -40,7 +40,6 @@ Through benchmark studies on 28 TCGA datasets, we demonstrated the superior perf
 
 In **```data_preprocessing_TCGA```** folder, we provide TCGA data downloading and preprocessing methods. Here we take the breast cancer dataset as an example. More details see README in **```data_preprocessing_TCGA```** folder.
 
-
 In **```data_preprocessing_cfRNA```** folder, we provide liquid biopsy data preprocessing methods. Here we collected three types of body fluid datasets: the plasma dataset, the extracellular vesicle (EV) dataset, and the platelet dataset. More details see README in **```data_preprocessing_cfRNA```** folder.
 
 ### 3.Model training and test.
@@ -171,8 +170,49 @@ For liquid biopsy data,the training function is the same as TCGA data, but the p
 
 ```
 cd Pathformer_code
-
+python3 Pathformer_main.py \
+--modal_all_path ../Result/EV/modal_type_all.txt \
+--modal_select_path ../Result/EV/modal_select.txt \
+--gene_all ../reference/gene_mRNA_cfRNA.txt \
+--gene_select ../reference/Pathformer_select_gene.txt \
+--pathway_gene_w ../reference/pathway_gene_weight.npy \
+--pathway_crosstalk_network  ../reference/pathway_crosstalk_network_matrix.npy \
+--data_path ../data_cfRNA/3.data_gene_embedding/merge/EV/data_all.npy \
+--label_path ../data_cfRNA/2.sample_id/sample_cross_EV_new_final.txt \
+--save_path ../Result/EV/ \
+--dataset 1 \
+--model_name EV \
+--model_save True \
+--batch_size 8 \
+--gradient_num 4 \
+--epoch_num 2000 \
+--early_stopping_type f1_macro_2 \
+--patience 10 \
+--delta 1e-2 \
+--stop_epoch 100 \
+--validation_each_epoch_no 1 \
+--depth 3 \
+--heads  8 \
+--dim_head 32 \
+--beta 1 \
+--attn_dropout 0.2 \
+--ff_dropout 0.2 \
+--classifier_dropout 0.3 \
+--lr_max 1e-5 \
+--lr_min 1e-8
 ```
+The parameter description is the same as section 3.1.
+
+### 4.Model interpretability.
+
+To better understand Pathformer’s decisions, we increased the interpretability of Pathformer by calculating contributions of different modalities, important pathways and their key genes, and hub module of the updated pathway crosstalk network. The contributions of different modalities are calculated by averaging attention maps in row-attention. The important pathways and their key genes are defined by SHapley Additive exPlanations (SHAP value). The hub module of the updated pathway crosstalk network is screened by sub-network scores based on SHAP values of pathways.
+
+Here we take breast cancer subtype classification as an example, and the calculation is as follows:
+```
+cd Pathformer_code
+bash ../Pathformer_Interpretability/log_BRCA_subtype.sh
+```
+More details see README in **```Pathformer_Interpretability```** folder.
 
 ## License and Disclaimer
 
