@@ -1,0 +1,68 @@
+#TCGA
+RNA=['RNA_all_TPM']
+DNA_methylation=['methylation_count',
+                 'methylation_max',
+                 'methylation_min',
+                 'methylation_mean',
+                 'promoter_methylation_count',
+                 'promoter_methylation_max',
+                 'promoter_methylation_min',
+                 'promoter_methylation_mean']
+DNA_CNV=['CNV_count','CNV_max','CNV_min','CNV_mean','CNV_gene_level']
+
+#cfRNA
+RNA_expression=['ALL_data_TPM']
+RNA_chimeric=['chimeric_count']
+RNA_promoter=['promoter_count','promoter_max','promoter_min','promoter_mean']
+RNA_splicing=['splicing_count_A3SS',
+'splicing_entropy_A3SS',
+'splicing_max_A3SS',
+'splicing_min_A3SS',
+'splicing_mean_A3SS',
+'splicing_count_A5SS',
+'splicing_entropy_A5SS',
+'splicing_max_A5SS',
+'splicing_min_A5SS',
+'splicing_mean_A5SS',
+'splicing_count_MXE',
+'splicing_entropy_MXE',
+'splicing_max_MXE',
+'splicing_min_MXE',
+'splicing_mean_MXE',
+'splicing_count_RI',
+'splicing_entropy_RI',
+'splicing_max_RI',
+'splicing_min_RI',
+'splicing_mean_RI',
+'splicing_count_SE',
+'splicing_entropy_SE',
+'splicing_max_SE',
+'splicing_min_SE',
+'splicing_mean_SE']
+RNA_ASE=['ASE_count',
+'ASE_entropy',
+'ASE_max',
+'ASE_min',
+'ASE_mean',
+'ASE_mean_all',
+'ASE_mean_window_1',
+'ASE_mean_window_2',
+'ASE_mean_window_3']
+RNA_editing=['editing_count',
+'editing_entropy',
+'editing_max',
+'editing_min',
+'editing_mean',
+'editing_mean_all',
+'editing_mean_window_1',
+'editing_mean_window_2',
+'editing_mean_window_3']
+RNA_SNP=['SNP_count',
+'SNP_entropy',
+'SNP_max',
+'SNP_min',
+'SNP_mean',
+'SNP_mean_all',
+'SNP_mean_window_1',
+'SNP_mean_window_2',
+'SNP_mean_window_3']
