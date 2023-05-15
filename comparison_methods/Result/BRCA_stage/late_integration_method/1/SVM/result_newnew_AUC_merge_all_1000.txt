@@ -1,0 +1,2 @@
+acc_discovery	auc_discovery	f1_weighted_discovery	f1_macro_discovery	acc_validation	auc_validation	f1_weighted_validation	f1_macro_validation
+0.27740863787375414	0.9990604620316127	0.1226734217157869	0.21871596967590448	0.28	0.503968253968254	0.12250000000000003	0.21875000000000003
