@@ -36,12 +36,6 @@ def get_label(stage_label_path,save_path):
 
     sample_id_2['y']=sample_id_2['label'].astype(int)
     sample_id_2.index=range(len(sample_id_2))
-    rskf =RepeatedStratifiedKFold(n_splits=5, n_repeats=2,random_state=1)
-    j=1
-    for train_index,test_index in rskf.split(sample_id_2, np.array(sample_id_2['y']).astype(int)):
-        sample_id_2.loc[train_index,'dataset_'+str(j)]='discovery'
-        sample_id_2.loc[test_index, 'dataset_' + str(j)] = 'validation'
-        j=j+1
     sample_id_2.to_csv(save_path+'/sample_cross_stage.txt',sep='\t',index=False)
 
 
