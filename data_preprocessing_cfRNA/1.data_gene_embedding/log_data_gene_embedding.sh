@@ -59,8 +59,8 @@ python3 ${root_path}/data_preprocessing_cfRNA/1.data_gene_embedding/7.2.data_SNP
 python3 ${root_path}/data_preprocessing_cfRNA/1.data_gene_embedding/8.data_merge.py \
 --path ${root_path}/data_cfRNA/3.data_gene_embedding/embedding_all/${d}/ \
 --reference_path ${root_path}/reference/ \
---label_path ${root_path}/data_cfRNA/data_gene_embedding/sample_id/sample_cross_${d}.txt \
---save_path ${root_path}/data_cfRNA/data_gene_embedding/merge/${d}/
+--label_path ${root_path}/data_cfRNA/2.sample_id/sample_cross_${d}.txt \
+--save_path ${root_path}/data_cfRNA/3.data_gene_embedding/merge/${d}/
 
 
 done
