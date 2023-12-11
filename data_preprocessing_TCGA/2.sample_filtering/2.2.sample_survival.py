@@ -38,12 +38,6 @@ def get_label(survival_label_path,save_path):
     sample_id_3=pd.read_csv(save_path+'/sample_id_label_3.txt',sep='\t')
     sample_id_3['y']=sample_id_3['label'].astype(int)
     sample_id_3.index=range(len(sample_id_3))
-    rskf =RepeatedStratifiedKFold(n_splits=5, n_repeats=2,random_state=1)
-    j=1
-    for train_index,test_index in rskf.split(sample_id_3, np.array(sample_id_3['y']).astype(int)):
-        sample_id_3.loc[train_index,'dataset_'+str(j)]='discovery'
-        sample_id_3.loc[test_index, 'dataset_' + str(j)] = 'validation'
-        j=j+1
     sample_id_3.to_csv(save_path+'/sample_cross_survival.txt',sep='\t',index=False)
 
 def main(args):
