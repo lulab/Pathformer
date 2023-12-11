@@ -1,6 +1,6 @@
 # Liquid biopsy data preprocessing
 
-To further verify the effect of Pathformer in cancer diagnosis, we collected three types of body fluid datasets: the plasma dataset, the extracellular vesicle (EV) dataset, and the platelet dataset. Liquid biopsie data preprocessing includes bioinformatics pipeline for multi-modal data and gene embedding of multi-modal data.
+To further verify the effect of Pathformer in cancer diagnosis, we collected two types of body fluid datasets: the plasma dataset and the platelet dataset. Liquid biopsie data preprocessing includes bioinformatics pipeline for multi-modal data and gene embedding of multi-modal data.
 
 ## 1.Bioinformatics pipeline for multi-modal liquid biopsie data
 
@@ -13,10 +13,8 @@ Bioinformatics pipeline of multi-modal liquid biopsie data is developed by our l
 
 ## 2. Gene embedding of multi-modal liquid biopsie data
 
-Pathformer supports any number of modalities as input which may have different dimensions, including nucleotide level, fragment level, and gene level. Pathformer’s input for liquid biopsy datasets includes gene-level RNA expression; fragment-level RNA alternative promoter, RNA splicing, and chimeric RNA; and nucleotide-level RNA editing, RNA ASE, and RNA SNV. To address this, we used multiple statistical indicators as gene embeddings to retain the gene diversity across different modalities. These statistical indicators include gene level score, count, entropy, minimum, maximum, mean, weighted mean in whole gene, and weighted mean in window. 
+Pathformer supports any number of modalities as input which may have different dimensions, including nucleotide level, fragment level, and gene level. Pathformer’s input for liquid biopsy datasets includes gene-level RNA expression; fragment-level RNA alternative promoter, RNA splicing, and chimeric RNA; and nucleotide-level RNA editing, RNA ASE, and RNA SNV. To retain the diversity of different modalities, we used a series of statistical indicators to convert different modalities into gene level modal features, and then concatenate these modal features into a compressed multi-modal vector as gene embedding. These statistical indicators include gene level score, count, entropy, minimum, maximum, mean, weighted mean in whole gene, and weighted mean in window.
 
 ```bash data_preprocessing_cfRNA/1.data_gene_embedding/log_data_gene_embedding.sh```
 
-The relevant code can be found in ```/data_preprocessing_cfRNA/1.data_gene_embedding/```. data_all.npy is the gene embedding matrix of each dataset.
-
-
+The relevant code can be found in ```/data_preprocessing_cfRNA/1.data_gene_embedding/```. 'data_all.npy' is the gene embedding matrix of each dataset.
