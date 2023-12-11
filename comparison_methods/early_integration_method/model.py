@@ -155,8 +155,8 @@ def main_model(data_path, label_path, feature_name, dataset, method, num, save_p
     data = data.fillna(0)
 
     label = pd.read_csv(label_path, sep='\t')
-    sample_discovery = label.loc[label['dataset_' + str(dataset)] != 'validation', 'sample_id']
-    sample_validation = label.loc[label['dataset_' + str(dataset)] == 'validation', 'sample_id']
+    sample_discovery = label.loc[label['dataset_' + str(dataset)] != 'test', 'sample_id']
+    sample_validation = label.loc[label['dataset_' + str(dataset)] == 'test', 'sample_id']
     label = label.set_index('sample_id')
 
     y_discovery = np.array(label.loc[sample_discovery, 'y'])
