@@ -96,12 +96,3 @@ load("/apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/1.ra
 expr = as.data.frame(data)
 write.csv(expr,"/apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/1.raw_data/BRCA.CNV_masked_seg.csv",row.names=TRUE)
 
-# #CNV_gene_score
-# CNV_gene_query <- GDCquery(project = "TCGA-BRCA",
-#                   data.category = "Copy Number Variation",
-#                   data.type = "Gene Level Copy Number Scores")
-# GDCdownload(CNV_gene_query, method = "api",directory="/apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/1.raw_data")
-# CNV_gene_data <- GDCprepare(query = CNV_gene_query,
-#                    save = TRUE,
-#                    directory =  "/apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/1.raw_data",
-#                    save.filename = "/apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/1.raw_data/BRCA.CNV_gene_score.RData")
