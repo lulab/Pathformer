@@ -241,9 +241,9 @@ def main_model(data_path, label_path, feature_name, dataset, method, num, save_p
             result_auc.loc[i, 'f1_weighted_validation'] = f1_weighted_validation
             result_auc.loc[i, 'f1_macro_validation'] = f1_macro_validation
 
-    result_predict_discovery.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_discovery_' + feature_name + '.txt', sep='\t', index=False)
-    result_predict_validation.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_validation_' + feature_name + '.txt', sep='\t', index=False)
-    result_auc.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_AUC_' + feature_name + '.txt', sep='\t',index=False)
+    result_predict_discovery.to_csv(save_path  + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_discovery_' + feature_name + '.txt', sep='\t', index=False)
+    result_predict_validation.to_csv(save_path + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_validation_' + feature_name + '.txt', sep='\t', index=False)
+    result_auc.to_csv(save_path + '/' + str(method.split('_cv')[0]) + '/result_newnew_AUC_' + feature_name + '.txt', sep='\t',index=False)
 
 
 def main(args):
