@@ -2,7 +2,7 @@
 
 root_path=$"/apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/"
 
-for d in plasma EV platelet
+for d in plasma platelet
 do
 python3 ${root_path}/data_preprocessing_cfRNA/1.data_gene_embedding/1.data_expression_TPM.py \
 --input_path ${root_path}/data_cfRNA/1.raw_data/${d}/ \
