@@ -1,7 +1,7 @@
 #!/bin/sh
 
 gistic2 \
--b /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data/gistic2/BRCA \
+-b /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/1.raw_data/gistic2/BRCA \
 -seg  /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/1.raw_data/BRCA.CNV_masked_seg_filter.txt \
 -mk /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/reference/snp6.na35.remap.hg38.subset.marker_file.txt \
 -refgene /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/reference/hg38.UCSC.add_miR.160920.refgene.mat \
