@@ -38,7 +38,7 @@ def get_label(survival_label_path,save_path):
     sample_id_3=pd.read_csv(save_path+'/sample_id_label_3.txt',sep='\t')
     sample_id_3['y']=sample_id_3['label'].astype(int)
     sample_id_3.index=range(len(sample_id_3))
-    sample_id_3.to_csv(save_path+'/sample_cross_survival.txt',sep='\t',index=False)
+    sample_id_3.to_csv(save_path+'/sample_survival.txt',sep='\t',index=False)
 
 def main(args):
     get_label(args.survival_label_path,args.save_path)
