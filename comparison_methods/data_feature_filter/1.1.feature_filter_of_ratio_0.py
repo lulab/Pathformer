@@ -39,7 +39,7 @@ def get_feature(feature_path,path_label,dataset,p,savepath,feature_type):
         data_1 = data_1.rename(columns={data_1.columns[0]: 'feature'})
     data_1=data_1.fillna(0)
     sample=pd.read_csv(path_label,sep='\t')
-    sample_train_test=sample.loc[(sample['dataset_'+str(dataset)]=='discovery'),'sample_id']
+    sample_train_test=sample.loc[(sample['dataset_'+str(dataset)]!='validation'),'sample_id']
     sample_validation=sample.loc[(sample['dataset_'+str(dataset)]=='validation'),'sample_id']
     data_1_train=data_1[['feature']+list(sample_train_test)]
 
@@ -74,5 +74,4 @@ if __name__ == '__main__':
         help='feature_type',dest='feature_type')
     args = parser.parse_args()
     main(args)
-
 
