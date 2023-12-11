@@ -48,7 +48,7 @@ def get_feature_all(feature_path, path_label, dataset_num, scaler, savepath, fea
     data_feature=data_feature.drop_duplicates()
 
     data_label = pd.read_csv(path_label, sep='\t')
-    sample_train = list(data_label.loc[data_label['dataset_' + str(dataset_num)] != 'validation', 'sample_id'])
+    sample_train = list(data_label.loc[data_label['dataset_' + str(dataset_num)] != 'test', 'sample_id'])
     data_label = data_label.set_index('sample_id')
 
     y_train = np.array(data_label.loc[sample_train, 'y'])
