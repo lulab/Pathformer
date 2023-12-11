@@ -36,7 +36,7 @@ def get_label(stage_label_path,save_path):
 
     sample_id_2['y']=sample_id_2['label'].astype(int)
     sample_id_2.index=range(len(sample_id_2))
-    sample_id_2.to_csv(save_path+'/sample_cross_stage.txt',sep='\t',index=False)
+    sample_id_2.to_csv(save_path+'/sample_stage.txt',sep='\t',index=False)
 
 
 def main(args):
