@@ -15,7 +15,4 @@ python3 ${root_path}/data_preprocessing_TCGA/2.sample_filtering/2.2.sample_survi
 --survival_label_path ${root_path}/data/raw_data/survival_BRCA_survival.txt \
 --save_path ${root_path}/data_TCGA/2.sample_id/
 
-python3 ${root_path}/data_preprocessing_TCGA/2.sample_filtering/2.3.sample_subtype.py \
---subtype_label_path ${root_path}/data/raw_data/subtypes_R.txt \
---save_path ${root_path}/data_TCGA/2.sample_id/
 
