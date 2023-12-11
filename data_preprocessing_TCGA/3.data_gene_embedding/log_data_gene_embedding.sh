@@ -47,14 +47,6 @@ python3 ${root_path}/data_preprocessing_TCGA/3.data_gene_embedding/3.2.data_gene
 --label_path ${root_path}/data_TCGA/2.sample_id/sample_cross_stage.txt \
 --save_path ${root_path}/data_TCGA/3.data_gene_embedding/merge/merge_data_stage/
 
-
-python3 ${root_path}/data_preprocessing_TCGA/3.data_gene_embedding/3.2.data_gene_embedding_merge.py \
---path ${root_path}/data_TCGA/3.data_gene_embedding/embedding_all/ \
---reference_path ${root_path}/reference/ \
---label_path ${root_path}/data_TCGA/2.sample_id/sample_cross_subtype.txt \
---save_path ${root_path}/data_TCGA/3.data_gene_embedding/merge/merge_data_subtype/
-
-
 python3 ${root_path}/data_preprocessing_TCGA/3.data_gene_embedding/3.2.data_gene_embedding_merge.py \
 --path ${root_path}/data_TCGA/3.data_gene_embedding/embedding_all/ \
 --reference_path ${root_path}/reference/ \
