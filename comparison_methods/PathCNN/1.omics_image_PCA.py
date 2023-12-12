@@ -113,17 +113,17 @@ def get_pac(dataset,label_path,data_path,save_path):
         data_CNV_test_all=pd.concat([data_CNV_test_all,data_CNV_test_new])
 
 
-    data_count_train_all.to_csv(save_path+str(dataset)+'/data_count_train_all.txt',sep='\t')
-    data_count_validation_all.to_csv(save_path+str(dataset)+'/data_count_validation_all.txt',sep='\t')
-    data_count_test_all.to_csv(save_path+str(dataset)+'/data_count_test_all.txt',sep='\t')
+    data_count_train_all.to_csv(save_path+'/data_count_train_all.txt',sep='\t')
+    data_count_validation_all.to_csv(save_path+'/data_count_validation_all.txt',sep='\t')
+    data_count_test_all.to_csv(save_path+'/data_count_test_all.txt',sep='\t')
 
-    data_methylation_train_all.to_csv(save_path+str(dataset)+'/data_methylation_train_all.txt',sep='\t')
-    data_methylation_validation_all.to_csv(save_path+str(dataset)+'/data_methylation_validation_all.txt',sep='\t')
-    data_methylation_test_all.to_csv(save_path+str(dataset)+'/data_methylation_test_all.txt',sep='\t')
+    data_methylation_train_all.to_csv(save_path+'/data_methylation_train_all.txt',sep='\t')
+    data_methylation_validation_all.to_csv(save_path+'/data_methylation_validation_all.txt',sep='\t')
+    data_methylation_test_all.to_csv(save_path+'/data_methylation_test_all.txt',sep='\t')
 
-    data_CNV_train_all.to_csv(save_path+str(dataset)+'/data_CNV_train_all.txt',sep='\t')
-    data_CNV_validation_all.to_csv(save_path+str(dataset)+'/data_CNV_validation_all.txt',sep='\t')
-    data_CNV_test_all.to_csv(save_path+str(dataset)+'/data_CNV_test_all.txt',sep='\t')
+    data_CNV_train_all.to_csv(save_path+'/data_CNV_train_all.txt',sep='\t')
+    data_CNV_validation_all.to_csv(save_path+'/data_CNV_validation_all.txt',sep='\t')
+    data_CNV_test_all.to_csv(save_path+'/data_CNV_test_all.txt',sep='\t')
 
 
 
