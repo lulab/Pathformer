@@ -155,201 +155,196 @@ def main_model(data_path, label_path, feature_name, dataset, method, num, save_p
     data = data.rename(columns={data.columns[0]: 'feature'})
     data = data.fillna(0)
     label = pd.read_csv(label_path, sep='\t')
-    sample_discovery = label.loc[label['dataset_' + str(dataset)] != 'test', 'sample_id']
-    sample_validation = label.loc[label['dataset_' + str(dataset)] == 'test', 'sample_id']
+    sample_train = label.loc[label['dataset_' + str(dataset)] == 'train', 'sample_id']
+    sample_test = label.loc[label['dataset_' + str(dataset)] == 'test', 'sample_id']
     label = label.set_index('sample_id')
-    y_discovery = np.array(label.loc[sample_discovery, 'y'])
-    y_discovery = y_discovery.astype('int')
-    y_validation = np.array(label.loc[sample_validation, 'y'])
-    y_validation = y_validation.astype('int')
-    X_discovery = np.array(data.loc[:, sample_discovery]).T
-    X_validation = np.array(data.loc[:, sample_validation]).T
-    result_predict_discovery = pd.DataFrame(columns={'sample_id', 'label'})
-    result_predict_discovery['sample_id'] = sample_discovery
-    result_predict_discovery['label'] = list(label.loc[sample_discovery, 'y'])
-    result_predict_validation = pd.DataFrame(columns={'sample_id', 'label'})
-    result_predict_validation['sample_id'] = sample_validation
-    result_predict_validation['label'] = list(label.loc[sample_validation, 'y'])
-    result_auc = pd.DataFrame(columns={'AUC_discovery', 'AUC_validation'})
+    y_train = np.array(label.loc[sample_train, 'y'])
+    y_train = y_train.astype('int')
+    y_test = np.array(label.loc[sample_test, 'y'])
+    y_test = y_test.astype('int')
+    X_train = np.array(data.loc[:, sample_train]).T
+    X_test = np.array(data.loc[:, sample_test]).T
+    result_predict_train = pd.DataFrame(columns={'sample_id', 'label'})
+    result_predict_train['sample_id'] = sample_train
+    result_predict_train['label'] = list(label.loc[sample_train, 'y'])
+    result_predict_test = pd.DataFrame(columns={'sample_id', 'label'})
+    result_predict_test['sample_id'] = sample_test
+    result_predict_test['label'] = list(label.loc[sample_test, 'y'])
+    result_auc = pd.DataFrame(columns={'AUC_train', 'AUC_test'})
     pds = 5
     for i in range(num):
-        sample_weight_ = compute_sample_weight(class_weight='balanced', y=y_discovery)
+        sample_weight_ = compute_sample_weight(class_weight='balanced', y=y_train)
         if len(set(label['y'])) > 2:
             clf = clf_select_multi(method, pds)
         else:
             clf = clf_select(method, pds)
         if (method == 'KNN') | (method == 'KNN_cv') | (method == 'NN'):
-            clf.fit(X_discovery, y_discovery)
+            clf.fit(X_train, y_train)
         else:
-            clf.fit(X_discovery, y_discovery, sample_weight_)
+            clf.fit(X_train, y_train, sample_weight_)
 
         if len(set(label['y'])) > 2:
-            predict_discovery = clf.predict_proba(X_discovery)
-            predict_validation = clf.predict_proba(X_validation)
-            y_discovery_index = list(set(y_discovery))
-            y_discovery_index.sort()
-            y_validation_index = list(set(y_validation))
-            y_validation_index.sort()
-            predict_discovery_ = predict_discovery[:, y_discovery_index] / predict_discovery[:, y_discovery_index].sum(
-                axis=1, keepdims=1)
-            predict_validation_ = predict_validation[:, y_validation_index] / predict_validation[:,
-                                                                              y_validation_index].sum(axis=1,
-                                                                                                      keepdims=1)
-            predict_discovery_[np.isnan(predict_discovery_)] = 1 / predict_discovery_.shape[1]
-            predict_validation_[np.isnan(predict_validation_)] = 1 / predict_validation_.shape[1]
-            acc_discovery, auc_weighted_ovr_discovery, auc_weighted_ovo_discovery, auc_macro_ovr_discovery, auc_macro_ovo_discovery, f1_weighted_discovery, f1_macro_discovery = plot_roc_multi(
-                predict_discovery_, rankdata(y_discovery, method='dense') - 1)
-            acc_validation, auc_weighted_ovr_validation, auc_weighted_ovo_validation, auc_macro_ovr_validation, auc_macro_ovo_validation, f1_weighted_validation, f1_macro_validation = plot_roc_multi(
-                predict_validation_, rankdata(y_validation, method='dense') - 1)
-            for y_num in list(set(y_discovery)):
-                result_predict_discovery['num_' + str(y_num) + '_' + str(i)] = predict_discovery[:, y_num]
-                result_predict_validation['num_' + str(y_num) + '_' + str(i)] = predict_validation[:, y_num]
-            result_auc.loc[i, 'acc_discovery'] = acc_discovery
-            result_auc.loc[i, 'auc_weighted_ovr_discovery'] = auc_weighted_ovr_discovery
-            result_auc.loc[i, 'auc_weighted_ovo_discovery'] = auc_weighted_ovo_discovery
-            result_auc.loc[i, 'auc_macro_ovr_discovery'] = auc_macro_ovr_discovery
-            result_auc.loc[i, 'auc_macro_ovo_discovery'] = auc_macro_ovo_discovery
-            result_auc.loc[i, 'f1_weighted_discovery'] = f1_weighted_discovery
-            result_auc.loc[i, 'f1_macro_discovery'] = f1_macro_discovery
-            result_auc.loc[i, 'acc_validation'] = acc_validation
-            result_auc.loc[i, 'auc_weighted_ovr_validation'] = auc_weighted_ovr_validation
-            result_auc.loc[i, 'auc_weighted_ovo_validation'] = auc_weighted_ovo_validation
-            result_auc.loc[i, 'auc_macro_ovr_validation'] = auc_macro_ovr_validation
-            result_auc.loc[i, 'auc_macro_ovo_validation'] = auc_macro_ovo_validation
-            result_auc.loc[i, 'f1_weighted_validation'] = f1_weighted_validation
-            result_auc.loc[i, 'f1_macro_validation'] = f1_macro_validation
+            predict_train = clf.predict_proba(X_train)
+            predict_test = clf.predict_proba(X_test)
+            y_train_index = list(set(y_train))
+            y_train_index.sort()
+            y_test_index = list(set(y_test))
+            y_test_index.sort()
+            predict_train_ = predict_train[:, y_train_index] / predict_train[:, y_train_index].sum(axis=1, keepdims=1)
+            predict_test_ = predict_test[:, y_test_index] / predict_test[:,y_test_index].sum(axis=1,keepdims=1)
+            predict_train_[np.isnan(predict_train_)] = 1 / predict_train_.shape[1]
+            predict_test_[np.isnan(predict_test_)] = 1 / predict_test_.shape[1]
+            acc_train, auc_weighted_ovr_train, auc_weighted_ovo_train, auc_macro_ovr_train, auc_macro_ovo_train, f1_weighted_train, f1_macro_train = plot_roc_multi(
+                predict_train_, rankdata(y_train, method='dense') - 1)
+            acc_test, auc_weighted_ovr_test, auc_weighted_ovo_test, auc_macro_ovr_test, auc_macro_ovo_test, f1_weighted_test, f1_macro_test = plot_roc_multi(
+                predict_test_, rankdata(y_test, method='dense') - 1)
+            for y_num in list(set(y_train)):
+                result_predict_train['num_' + str(y_num) + '_' + str(i)] = predict_train[:, y_num]
+                result_predict_test['num_' + str(y_num) + '_' + str(i)] = predict_test[:, y_num]
+            result_auc.loc[i, 'acc_train'] = acc_train
+            result_auc.loc[i, 'auc_weighted_ovr_train'] = auc_weighted_ovr_train
+            result_auc.loc[i, 'auc_weighted_ovo_train'] = auc_weighted_ovo_train
+            result_auc.loc[i, 'auc_macro_ovr_train'] = auc_macro_ovr_train
+            result_auc.loc[i, 'auc_macro_ovo_train'] = auc_macro_ovo_train
+            result_auc.loc[i, 'f1_weighted_train'] = f1_weighted_train
+            result_auc.loc[i, 'f1_macro_train'] = f1_macro_train
+            result_auc.loc[i, 'acc_test'] = acc_test
+            result_auc.loc[i, 'auc_weighted_ovr_test'] = auc_weighted_ovr_test
+            result_auc.loc[i, 'auc_weighted_ovo_test'] = auc_weighted_ovo_test
+            result_auc.loc[i, 'auc_macro_ovr_test'] = auc_macro_ovr_test
+            result_auc.loc[i, 'auc_macro_ovo_test'] = auc_macro_ovo_test
+            result_auc.loc[i, 'f1_weighted_test'] = f1_weighted_test
+            result_auc.loc[i, 'f1_macro_test'] = f1_macro_test
         else:
-            predict_discovery = clf.predict_proba(X_discovery)
-            roc_auc_discovery, fpr_discovery, tpr_discovery, precision_discovery, recall_discovery = plot_roc(
-                predict_discovery[:, 1], y_discovery)
-            predict_validation = clf.predict_proba(X_validation)
-            roc_auc_validation, fpr_validation, tpr_validation, precision_validation, recall_validation = plot_roc(
-                predict_validation[:, 1], y_validation)
-            result_predict_discovery['num_' + str(i)] = predict_discovery[:, 1]
-            result_predict_validation['num_' + str(i)] = predict_validation[:, 1]
-            result_auc.loc[i, 'AUC_discovery'] = roc_auc_discovery
-            result_auc.loc[i, 'AUC_validation'] = roc_auc_validation
-    result_predict_discovery.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_discovery_' + type + '_' + feature_name + '.txt', sep='\t',index=False)
-    result_predict_validation.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_validation_' + type + '_' + feature_name + '.txt', sep='\t',index=False)
+            predict_train = clf.predict_proba(X_train)
+            roc_auc_train, fpr_train, tpr_train, precision_train, recall_train = plot_roc(predict_train[:, 1], y_train)
+            predict_test = clf.predict_proba(X_test)
+            roc_auc_test, fpr_test, tpr_test, precision_test, recall_test = plot_roc(predict_test[:, 1], y_test)
+            result_predict_train['num_' + str(i)] = predict_train[:, 1]
+            result_predict_test['num_' + str(i)] = predict_test[:, 1]
+            result_auc.loc[i, 'AUC_train'] = roc_auc_train
+            result_auc.loc[i, 'AUC_test'] = roc_auc_test
+    result_predict_train.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_train_' + type + '_' + feature_name + '.txt', sep='\t',index=False)
+    result_predict_test.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_test_' + type + '_' + feature_name + '.txt', sep='\t',index=False)
     result_auc.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_AUC_' + type + '_' + feature_name + '.txt', sep='\t', index=False)
 
 
 def merge(dataset, feature_name, method, num, save_path, label_path):
     label = pd.read_csv(label_path, sep='\t')
-    result_predict_discovery_all = pd.DataFrame(columns={'sample_id', 'label'})
-    result_predict_validation_all = pd.DataFrame(columns={'sample_id', 'label'})
-    result_auc = pd.DataFrame(columns={'AUC_discovery', 'AUC_validation'})
+    result_predict_train_all = pd.DataFrame(columns={'sample_id', 'label'})
+    result_predict_test_all = pd.DataFrame(columns={'sample_id', 'label'})
+    result_auc = pd.DataFrame(columns={'AUC_train', 'AUC_test'})
     if len(set(label['y'])) > 2:
         for i in range(num):
             num_list = ['num_' + str(y_n) + '_' + str(i) for y_n in list(set(label['y']))]
             feature_type = 'count'
-            result_predict_discovery = pd.read_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_discovery_' + feature_type + '_' + feature_name + '.txt',sep='\t')
-            result_predict_validation = pd.read_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_validation_' + feature_type + '_' + feature_name + '.txt',sep='\t')
-            result_predict_discovery = result_predict_discovery[['sample_id', 'label'] + num_list]
-            result_predict_validation = result_predict_validation[['sample_id', 'label'] + num_list]
+            result_predict_train = pd.read_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_train_' + feature_type + '_' + feature_name + '.txt',sep='\t')
+            result_predict_test = pd.read_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_test_' + feature_type + '_' + feature_name + '.txt',sep='\t')
+            result_predict_train = result_predict_train[['sample_id', 'label'] + num_list]
+            result_predict_test = result_predict_test[['sample_id', 'label'] + num_list]
             for type in ['CNV', 'methylation']:
                 print(type)
-                result_predict_discovery_ = pd.read_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_discovery_' + type + '_' + feature_name + '.txt',sep='\t')
-                result_predict_validation_ = pd.read_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_validation_' + type + '_' + feature_name + '.txt',sep='\t')
+                result_predict_train_ = pd.read_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_train_' + type + '_' + feature_name + '.txt',sep='\t')
+                result_predict_test_ = pd.read_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_test_' + type + '_' + feature_name + '.txt',sep='\t')
                 for s in num_list:
-                    result_predict_discovery[s] = result_predict_discovery[s] + result_predict_discovery_[s]
-                    result_predict_validation[s] = result_predict_validation[s] + result_predict_validation_[s]
+                    result_predict_train[s] = result_predict_train[s] + result_predict_train_[s]
+                    result_predict_test[s] = result_predict_test[s] + result_predict_test_[s]
 
-            y_discovery = np.array(result_predict_discovery['label'])
-            y_discovery = y_discovery.astype('int')
-            y_validation = np.array(result_predict_validation['label'])
-            y_validation = y_validation.astype('int')
+            y_train = np.array(result_predict_train['label'])
+            y_train = y_train.astype('int')
+            y_test = np.array(result_predict_test['label'])
+            y_test = y_test.astype('int')
 
-            predict_discovery = np.zeros([len(result_predict_discovery), len(set(label['y']))])
-            predict_validation = np.zeros([len(result_predict_validation), len(set(label['y']))])
+            predict_train = np.zeros([len(result_predict_train), len(set(label['y']))])
+            predict_test = np.zeros([len(result_predict_test), len(set(label['y']))])
 
             for s in range(len(set(label['y']))):
-                predict_discovery[:, s] = result_predict_discovery['num_' + str(s) + '_' + str(i)] / 7
-                predict_validation[:, s] = result_predict_validation['num_' + str(s) + '_' + str(i)] / 7
+                predict_train[:, s] = result_predict_train['num_' + str(s) + '_' + str(i)] / 7
+                predict_test[:, s] = result_predict_test['num_' + str(s) + '_' + str(i)] / 7
 
-            y_discovery_index = list(set(y_discovery))
-            y_discovery_index.sort()
-            y_validation_index = list(set(y_validation))
-            y_validation_index.sort()
+            y_train_index = list(set(y_train))
+            y_train_index.sort()
+            y_test_index = list(set(y_test))
+            y_test_index.sort()
 
-            predict_discovery_ = predict_discovery[:, y_discovery_index] / predict_discovery[:, y_discovery_index].sum(axis=1, keepdims=1)
-            predict_validation_ = predict_validation[:, y_validation_index] / predict_validation[:,y_validation_index].sum(axis=1, keepdims=1)
-            predict_discovery_[np.isnan(predict_discovery_)] = 1 / predict_discovery_.shape[1]
-            predict_validation_[np.isnan(predict_validation_)] = 1 / predict_validation_.shape[1]
-            acc_discovery, auc_weighted_ovr_discovery, auc_weighted_ovo_discovery, auc_macro_ovr_discovery, auc_macro_ovo_discovery, f1_weighted_discovery, f1_macro_discovery = plot_roc_multi( predict_discovery_, rankdata(y_discovery, method='dense') - 1)
-            acc_validation, auc_weighted_ovr_validation, auc_weighted_ovo_validation, auc_macro_ovr_validation, auc_macro_ovo_validation, f1_weighted_validation, f1_macro_validation = plot_roc_multi(predict_validation_, rankdata(y_validation, method='dense') - 1)
+            predict_train_ = predict_train[:, y_train_index] / predict_train[:, y_train_index].sum(axis=1, keepdims=1)
+            predict_test_ = predict_test[:, y_test_index] / predict_test[:,y_test_index].sum(axis=1, keepdims=1)
+            predict_train_[np.isnan(predict_train_)] = 1 / predict_train_.shape[1]
+            predict_test_[np.isnan(predict_test_)] = 1 / predict_test_.shape[1]
+            acc_train, auc_weighted_ovr_train, auc_weighted_ovo_train, auc_macro_ovr_train, auc_macro_ovo_train, f1_weighted_train, f1_macro_train = plot_roc_multi( predict_train_, rankdata(y_train, method='dense') - 1)
+            acc_test, auc_weighted_ovr_test, auc_weighted_ovo_test, auc_macro_ovr_test, auc_macro_ovo_test, f1_weighted_test, f1_macro_test = plot_roc_multi(predict_test_, rankdata(y_test, method='dense') - 1)
 
-            for y_num in list(set(y_discovery)):
-                result_predict_discovery_all['num_' + str(y_num) + '_' + str(i)] = predict_discovery[:, y_num]
-                result_predict_validation_all['num_' + str(y_num) + '_' + str(i)] = predict_validation[:, y_num]
+            for y_num in list(set(y_train)):
+                result_predict_train_all['num_' + str(y_num) + '_' + str(i)] = predict_train[:, y_num]
+                result_predict_test_all['num_' + str(y_num) + '_' + str(i)] = predict_test[:, y_num]
 
-            result_auc.loc[i, 'acc_discovery'] = acc_discovery
-            result_auc.loc[i, 'auc_weighted_ovr_discovery'] = auc_weighted_ovr_discovery
-            result_auc.loc[i, 'auc_weighted_ovo_discovery'] = auc_weighted_ovo_discovery
-            result_auc.loc[i, 'auc_macro_ovr_discovery'] = auc_macro_ovr_discovery
-            result_auc.loc[i, 'auc_macro_ovo_discovery'] = auc_macro_ovo_discovery
-            result_auc.loc[i, 'f1_weighted_discovery'] = f1_weighted_discovery
-            result_auc.loc[i, 'f1_macro_discovery'] = f1_macro_discovery
-            result_auc.loc[i, 'acc_validation'] = acc_validation
-            result_auc.loc[i, 'auc_weighted_ovr_validation'] = auc_weighted_ovr_validation
-            result_auc.loc[i, 'auc_weighted_ovo_validation'] = auc_weighted_ovo_validation
-            result_auc.loc[i, 'auc_macro_ovr_validation'] = auc_macro_ovr_validation
-            result_auc.loc[i, 'auc_macro_ovo_validation'] = auc_macro_ovo_validation
-            result_auc.loc[i, 'f1_weighted_validation'] = f1_weighted_validation
-            result_auc.loc[i, 'f1_macro_validation'] = f1_macro_validation
+            result_auc.loc[i, 'acc_train'] = acc_train
+            result_auc.loc[i, 'auc_weighted_ovr_train'] = auc_weighted_ovr_train
+            result_auc.loc[i, 'auc_weighted_ovo_train'] = auc_weighted_ovo_train
+            result_auc.loc[i, 'auc_macro_ovr_train'] = auc_macro_ovr_train
+            result_auc.loc[i, 'auc_macro_ovo_train'] = auc_macro_ovo_train
+            result_auc.loc[i, 'f1_weighted_train'] = f1_weighted_train
+            result_auc.loc[i, 'f1_macro_train'] = f1_macro_train
+            result_auc.loc[i, 'acc_test'] = acc_test
+            result_auc.loc[i, 'auc_weighted_ovr_test'] = auc_weighted_ovr_test
+            result_auc.loc[i, 'auc_weighted_ovo_test'] = auc_weighted_ovo_test
+            result_auc.loc[i, 'auc_macro_ovr_test'] = auc_macro_ovr_test
+            result_auc.loc[i, 'auc_macro_ovo_test'] = auc_macro_ovo_test
+            result_auc.loc[i, 'f1_weighted_test'] = f1_weighted_test
+            result_auc.loc[i, 'f1_macro_test'] = f1_macro_test
 
-        result_predict_discovery_all['sample_id'] = result_predict_discovery['sample_id']
-        result_predict_validation_all['sample_id'] = result_predict_validation['sample_id']
-        result_predict_discovery_all['label'] = result_predict_discovery['label']
-        result_predict_validation_all['label'] = result_predict_validation['label']
+        result_predict_train_all['sample_id'] = result_predict_train['sample_id']
+        result_predict_test_all['sample_id'] = result_predict_test['sample_id']
+        result_predict_train_all['label'] = result_predict_train['label']
+        result_predict_test_all['label'] = result_predict_test['label']
 
     else:
         for i in range(num):
             num_list = ['num_' + str(i)]
             feature_type = 'count'
-            result_predict_discovery = pd.read_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_discovery_' + feature_type + '_' + feature_name + '.txt',sep='\t')
-            result_predict_validation = pd.read_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_validation_' + feature_type + '_' + feature_name + '.txt',sep='\t')
-            result_predict_discovery = result_predict_discovery[['sample_id', 'label'] + num_list]
-            result_predict_validation = result_predict_validation[['sample_id', 'label'] + num_list]
+            result_predict_train = pd.read_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_train_' + feature_type + '_' + feature_name + '.txt',sep='\t')
+            result_predict_test = pd.read_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_test_' + feature_type + '_' + feature_name + '.txt',sep='\t')
+            result_predict_train = result_predict_train[['sample_id', 'label'] + num_list]
+            result_predict_test = result_predict_test[['sample_id', 'label'] + num_list]
             for type in ['CNV', 'methylation']:
                 print(type)
-                result_predict_discovery_ = pd.read_csv(save_path + str(dataset) + '/' + str( method.split('_cv')[0]) + '/result_newnew_predict_discovery_' + type + '_' + feature_name + '.txt', sep='\t')
-                result_predict_validation_ = pd.read_csv(save_path + str(dataset) + '/' + str( method.split('_cv')[0]) + '/result_newnew_predict_validation_' + type + '_' + feature_name + '.txt',sep='\t')
+                result_predict_train_ = pd.read_csv(save_path + str(dataset) + '/' + str( method.split('_cv')[0]) + '/result_newnew_predict_train_' + type + '_' + feature_name + '.txt', sep='\t')
+                result_predict_test_ = pd.read_csv(save_path + str(dataset) + '/' + str( method.split('_cv')[0]) + '/result_newnew_predict_test_' + type + '_' + feature_name + '.txt',sep='\t')
                 for s in num_list:
-                    result_predict_discovery[s] = result_predict_discovery[s] + result_predict_discovery_[s]
-                    result_predict_validation[s] = result_predict_validation[s] + result_predict_validation_[s]
-            y_discovery = np.array(result_predict_discovery['label'])
-            y_discovery = y_discovery.astype('int')
-            y_validation = np.array(result_predict_validation['label'])
-            y_validation = y_validation.astype('int')
+                    result_predict_train[s] = result_predict_train[s] + result_predict_train_[s]
+                    result_predict_test[s] = result_predict_test[s] + result_predict_test_[s]
+            y_train = np.array(result_predict_train['label'])
+            y_train = y_train.astype('int')
+            y_test = np.array(result_predict_test['label'])
+            y_test = y_test.astype('int')
 
-            predict_discovery = np.zeros([len(result_predict_discovery), 1])
-            predict_validation = np.zeros([len(result_predict_validation), 1])
+            predict_train = np.zeros([len(result_predict_train), 1])
+            predict_test = np.zeros([len(result_predict_test), 1])
 
-            predict_discovery[:, 0] = result_predict_discovery['num_' + str(i)] / 7
-            predict_validation[:, 0] = result_predict_validation['num_' + str(i)] / 7
+            predict_train[:, 0] = result_predict_train['num_' + str(i)] / 7
+            predict_test[:, 0] = result_predict_test['num_' + str(i)] / 7
 
-            acc_discovery, auc_discovery, f1_weighted_discovery, f1_macro_discovery = get_roc(y_discovery, predict_discovery[:, 0])
-            acc_validation, auc_validation, f1_weighted_validation, f1_macro_validation = get_roc(y_validation, predict_validation[:, 0])
+            acc_train, auc_train, f1_weighted_train, f1_macro_train = get_roc(y_train, predict_train[:, 0])
+            acc_test, auc_test, f1_weighted_test, f1_macro_test = get_roc(y_test, predict_test[:, 0])
 
-            result_predict_discovery_all['num_' + str(i)] = predict_discovery[:, 0]
-            result_predict_validation_all['num_' + str(i)] = predict_validation[:, 0]
-            result_auc.loc[i, 'acc_discovery'] = acc_discovery
-            result_auc.loc[i, 'auc_discovery'] = auc_discovery
-            result_auc.loc[i, 'f1_weighted_discovery'] = f1_weighted_discovery
-            result_auc.loc[i, 'f1_macro_discovery'] = f1_macro_discovery
-            result_auc.loc[i, 'acc_validation'] = acc_validation
-            result_auc.loc[i, 'auc_validation'] = auc_validation
-            result_auc.loc[i, 'f1_weighted_validation'] = f1_weighted_validation
-            result_auc.loc[i, 'f1_macro_validation'] = f1_macro_validation
+            result_predict_train_all['num_' + str(i)] = predict_train[:, 0]
+            result_predict_test_all['num_' + str(i)] = predict_test[:, 0]
+            result_auc.loc[i, 'acc_train'] = acc_train
+            result_auc.loc[i, 'auc_train'] = auc_train
+            result_auc.loc[i, 'f1_weighted_train'] = f1_weighted_train
+            result_auc.loc[i, 'f1_macro_train'] = f1_macro_train
+            result_auc.loc[i, 'acc_test'] = acc_test
+            result_auc.loc[i, 'auc_test'] = auc_test
+            result_auc.loc[i, 'f1_weighted_test'] = f1_weighted_test
+            result_auc.loc[i, 'f1_macro_test'] = f1_macro_test
 
-        result_predict_discovery_all['sample_id'] = result_predict_discovery['sample_id']
-        result_predict_validation_all['sample_id'] = result_predict_validation['sample_id']
-        result_predict_discovery_all['label'] = result_predict_discovery['label']
-        result_predict_validation_all['label'] = result_predict_validation['label']
+        result_predict_train_all['sample_id'] = result_predict_train['sample_id']
+        result_predict_test_all['sample_id'] = result_predict_test['sample_id']
+        result_predict_train_all['label'] = result_predict_train['label']
+        result_predict_test_all['label'] = result_predict_test['label']
 
-    result_predict_discovery.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_discovery_merge_all_' + feature_name + '.txt', sep='\t', index=False)
-    result_predict_validation.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_validation_merge_all_' + feature_name + '.txt', sep='\t',index=False)
+    result_predict_train.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_train_merge_all_' + feature_name + '.txt', sep='\t', index=False)
+    result_predict_test.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_test_merge_all_' + feature_name + '.txt', sep='\t',index=False)
     result_auc.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_AUC_merge_all_' + feature_name + '.txt',sep='\t', index=False)
 
 
@@ -378,6 +373,3 @@ if __name__ == '__main__':
                         help='save_path', dest='save_path')
     args = parser.parse_args()
     main(args)
-
-
-
