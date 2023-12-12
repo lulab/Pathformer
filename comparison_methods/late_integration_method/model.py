@@ -224,9 +224,9 @@ def main_model(data_path, label_path, feature_name, dataset, method, num, save_p
             result_predict_test['num_' + str(i)] = predict_test[:, 1]
             result_auc.loc[i, 'AUC_train'] = roc_auc_train
             result_auc.loc[i, 'AUC_test'] = roc_auc_test
-    result_predict_train.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_train_' + type + '_' + feature_name + '.txt', sep='\t',index=False)
-    result_predict_test.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_test_' + type + '_' + feature_name + '.txt', sep='\t',index=False)
-    result_auc.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_AUC_' + type + '_' + feature_name + '.txt', sep='\t', index=False)
+    result_predict_train.to_csv(save_path + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_train_' + type + '_' + feature_name + '.txt', sep='\t',index=False)
+    result_predict_test.to_csv(save_path + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_test_' + type + '_' + feature_name + '.txt', sep='\t',index=False)
+    result_auc.to_csv(save_path + '/' + str(method.split('_cv')[0]) + '/result_newnew_AUC_' + type + '_' + feature_name + '.txt', sep='\t', index=False)
 
 
 def merge(dataset, feature_name, method, num, save_path, label_path):
@@ -238,14 +238,14 @@ def merge(dataset, feature_name, method, num, save_path, label_path):
         for i in range(num):
             num_list = ['num_' + str(y_n) + '_' + str(i) for y_n in list(set(label['y']))]
             feature_type = 'count'
-            result_predict_train = pd.read_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_train_' + feature_type + '_' + feature_name + '.txt',sep='\t')
-            result_predict_test = pd.read_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_test_' + feature_type + '_' + feature_name + '.txt',sep='\t')
+            result_predict_train = pd.read_csv(save_path + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_train_' + feature_type + '_' + feature_name + '.txt',sep='\t')
+            result_predict_test = pd.read_csv(save_path + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_test_' + feature_type + '_' + feature_name + '.txt',sep='\t')
             result_predict_train = result_predict_train[['sample_id', 'label'] + num_list]
             result_predict_test = result_predict_test[['sample_id', 'label'] + num_list]
             for type in ['CNV', 'methylation']:
                 print(type)
-                result_predict_train_ = pd.read_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_train_' + type + '_' + feature_name + '.txt',sep='\t')
-                result_predict_test_ = pd.read_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_test_' + type + '_' + feature_name + '.txt',sep='\t')
+                result_predict_train_ = pd.read_csv(save_path + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_train_' + type + '_' + feature_name + '.txt',sep='\t')
+                result_predict_test_ = pd.read_csv(save_path + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_test_' + type + '_' + feature_name + '.txt',sep='\t')
                 for s in num_list:
                     result_predict_train[s] = result_predict_train[s] + result_predict_train_[s]
                     result_predict_test[s] = result_predict_test[s] + result_predict_test_[s]
@@ -302,14 +302,14 @@ def merge(dataset, feature_name, method, num, save_path, label_path):
         for i in range(num):
             num_list = ['num_' + str(i)]
             feature_type = 'count'
-            result_predict_train = pd.read_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_train_' + feature_type + '_' + feature_name + '.txt',sep='\t')
-            result_predict_test = pd.read_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_test_' + feature_type + '_' + feature_name + '.txt',sep='\t')
+            result_predict_train = pd.read_csv(save_path + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_train_' + feature_type + '_' + feature_name + '.txt',sep='\t')
+            result_predict_test = pd.read_csv(save_path + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_test_' + feature_type + '_' + feature_name + '.txt',sep='\t')
             result_predict_train = result_predict_train[['sample_id', 'label'] + num_list]
             result_predict_test = result_predict_test[['sample_id', 'label'] + num_list]
             for type in ['CNV', 'methylation']:
                 print(type)
-                result_predict_train_ = pd.read_csv(save_path + str(dataset) + '/' + str( method.split('_cv')[0]) + '/result_newnew_predict_train_' + type + '_' + feature_name + '.txt', sep='\t')
-                result_predict_test_ = pd.read_csv(save_path + str(dataset) + '/' + str( method.split('_cv')[0]) + '/result_newnew_predict_test_' + type + '_' + feature_name + '.txt',sep='\t')
+                result_predict_train_ = pd.read_csv(save_path + '/' + str( method.split('_cv')[0]) + '/result_newnew_predict_train_' + type + '_' + feature_name + '.txt', sep='\t')
+                result_predict_test_ = pd.read_csv(save_path + '/' + str( method.split('_cv')[0]) + '/result_newnew_predict_test_' + type + '_' + feature_name + '.txt',sep='\t')
                 for s in num_list:
                     result_predict_train[s] = result_predict_train[s] + result_predict_train_[s]
                     result_predict_test[s] = result_predict_test[s] + result_predict_test_[s]
@@ -343,9 +343,9 @@ def merge(dataset, feature_name, method, num, save_path, label_path):
         result_predict_train_all['label'] = result_predict_train['label']
         result_predict_test_all['label'] = result_predict_test['label']
 
-    result_predict_train.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_train_merge_all_' + feature_name + '.txt', sep='\t', index=False)
-    result_predict_test.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_test_merge_all_' + feature_name + '.txt', sep='\t',index=False)
-    result_auc.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_AUC_merge_all_' + feature_name + '.txt',sep='\t', index=False)
+    result_predict_train.to_csv(save_path + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_train_merge_all_' + feature_name + '.txt', sep='\t', index=False)
+    result_predict_test.to_csv(save_path + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_test_merge_all_' + feature_name + '.txt', sep='\t',index=False)
+    result_auc.to_csv(save_path + '/' + str(method.split('_cv')[0]) + '/result_newnew_AUC_merge_all_' + feature_name + '.txt',sep='\t', index=False)
 
 
 def main(args):
@@ -373,3 +373,4 @@ if __name__ == '__main__':
                         help='save_path', dest='save_path')
     args = parser.parse_args()
     main(args)
+    
