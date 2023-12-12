@@ -296,7 +296,7 @@ def main_model(data_path,label_path,save_path,dataset,feature_num,stop,data_type
             print('f1_weighted_train:', f1_weighted_train)
             print('f1_macro_train:', f1_macro_train)
 
-            ######模型测试########
+            ######模型验证########
             val_prob, val_loss = test_epoch(data_tensor_val_list, adj_val_list, labels_val_tensor, sample_weight_val,idx_dict["val"], model_dict)
             ACC_val, AUC_val, f1_weighted_val, f1_macro_val = get_roc(labels_val_tensor.data.cpu().numpy(),val_prob[:, 1])
             # 输出
@@ -312,6 +312,7 @@ def main_model(data_path,label_path,save_path,dataset,feature_num,stop,data_type
             print('f1_weighted_val:', f1_weighted_val)
             print('f1_macro_val:', f1_macro_val)
             early_stopping([f1_macro_val], epoch)
+            ######模型测试########
             if epoch % val_inverval == 0:
                 te_prob, test_loss = test_epoch(data_tensor_te_list, adj_te_list, labels_te_tensor, sample_weight_te,idx_dict["te"], model_dict)
                 ACC_test, AUC_test, f1_weighted_test, f1_macro_test = get_roc(labels_te_tensor.data.cpu().numpy(),te_prob[:, 1])
@@ -327,7 +328,7 @@ def main_model(data_path,label_path,save_path,dataset,feature_num,stop,data_type
                 print('auc_test:', AUC_test)
                 print('f1_weighted_test:', f1_weighted_test)
                 print('f1_macro_test:', f1_macro_test)
-
+            ######模型最终测试########
             if (early_stopping.early_stop)&(epoch>=stop):
                 te_prob, test_loss = test_epoch(data_tensor_te_list, adj_te_list, labels_te_tensor, sample_weight_te,idx_dict["te"], model_dict)
                 ACC_test, AUC_test, f1_weighted_test, f1_macro_test = get_roc(labels_te_tensor.data.cpu().numpy(),te_prob[:, 1])
@@ -384,7 +385,7 @@ def main_model(data_path,label_path,save_path,dataset,feature_num,stop,data_type
             print('f1_macro_train_2:', f1_macro_train_2)
 
 
-            ######模型测试########
+            ######模型验证########
             val_prob, val_loss = test_epoch(data_tensor_val_list, adj_val_list, labels_val_tensor,sample_weight_val,idx_dict["val"], model_dict)
             acc_val, auc_weighted_ovr_val, auc_weighted_ovo_val, auc_macro_ovr_val, auc_macro_ovo_val, f1_weighted_val, f1_macro_val = get_roc_multi(labels_val_tensor.data.cpu().numpy(), val_prob)
             y_val_new = np.array(labels_val_tensor.data.cpu().numpy()).copy()
@@ -416,7 +417,7 @@ def main_model(data_path,label_path,save_path,dataset,feature_num,stop,data_type
             print('f1_weighted_val_2:', f1_weighted_val_2)
             print('f1_macro_val_2:', f1_macro_val_2)
             early_stopping([f1_macro_val_2], epoch)
-
+            ######模型测试########
             if epoch % val_inverval == 0:
                 te_prob, test_loss = test_epoch(data_tensor_te_list, adj_te_list, labels_te_tensor, sample_weight_te,idx_dict["te"], model_dict)
                 acc_test, auc_weighted_ovr_test, auc_weighted_ovo_test, auc_macro_ovr_test, auc_macro_ovo_test, f1_weighted_test, f1_macro_test = get_roc_multi(labels_te_tensor.data.cpu().numpy(), te_prob)
@@ -448,7 +449,7 @@ def main_model(data_path,label_path,save_path,dataset,feature_num,stop,data_type
                 print('AUC_test_2:', AUC_test_2)
                 print('f1_weighted_test_2:', f1_weighted_test_2)
                 print('f1_macro_test_2:', f1_macro_test_2)
-
+            ######模型最终测试########
             if (early_stopping.early_stop) & (epoch >= stop):
                 te_prob, test_loss = test_epoch(data_tensor_te_list, adj_te_list, labels_te_tensor, sample_weight_te,idx_dict["te"], model_dict)
                 acc_test, auc_weighted_ovr_test, auc_weighted_ovo_test, auc_macro_ovr_test, auc_macro_ovo_test, f1_weighted_test, f1_macro_test = get_roc_multi(labels_te_tensor.data.cpu().numpy(), te_prob)
