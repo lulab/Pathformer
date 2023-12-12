@@ -91,25 +91,25 @@ def get_result(result_path):
                     data_result_mean = data_result_all.groupby('num').mean()
                     max_num = int(list(data_result_mean.sort_values('roc_auc_Averaged').index)[-1])
 
-                    data_validation = pd.read_csv(save_path + '/result_validation_' + str(max_num) + '_new.csv', sep='\t',header=None)
-                    y_train = np.array(list(data_validation[0])[-2].split(',')).astype('int')
-                    y_test = np.array(list(data_validation[0])[-1].split(',')).astype('int')
+                    data_test = pd.read_csv(save_path + '/result_test_' + str(max_num) + '_new.csv', sep='\t',header=None)
+                    y_train = np.array(list(data_test[0])[-2].split(',')).astype('int')
+                    y_test = np.array(list(data_test[0])[-1].split(',')).astype('int')
 
                     predict_train_Averaged = np.zeros([len(y_train), y_num])
                     predict_test_Averaged = np.zeros([len(y_test), y_num])
                     predict_train_Weighted = np.zeros([len(y_train), y_num])
                     predict_test_Weighted = np.zeros([len(y_test), y_num])
                     for j in range(y_num):
-                        predict_train_Averaged_ = np.array(list(data_validation.iloc[j])[0].split(',')).astype('float')
+                        predict_train_Averaged_ = np.array(list(data_test.iloc[j])[0].split(',')).astype('float')
                         predict_train_Averaged[:, j] = predict_train_Averaged_
                     for j in range(y_num):
-                        predict_test_Averaged_ = np.array(list(data_validation.iloc[j + y_num])[0].split(',')).astype('float')
+                        predict_test_Averaged_ = np.array(list(data_test.iloc[j + y_num])[0].split(',')).astype('float')
                         predict_test_Averaged[:, j] = predict_test_Averaged_
                     for j in range(y_num):
-                        predict_train_Weighted_ = np.array(list(data_validation.iloc[j + y_num + y_num])[0].split(',')).astype('float')
+                        predict_train_Weighted_ = np.array(list(data_test.iloc[j + y_num + y_num])[0].split(',')).astype('float')
                         predict_train_Weighted[:, j] = predict_train_Weighted_
                     for j in range(y_num):
-                        predict_test_Weighted_ = np.array(list(data_validation.iloc[j + y_num + y_num + y_num])[0].split(',')).astype('float')
+                        predict_test_Weighted_ = np.array(list(data_test.iloc[j + y_num + y_num + y_num])[0].split(',')).astype('float')
                         predict_test_Weighted[:, j] = predict_test_Weighted_
                     predict_train_Averaged[np.isnan(predict_train_Averaged)] = 0.5
                     predict_test_Averaged[np.isnan(predict_test_Averaged)] = 0.5
@@ -177,25 +177,25 @@ def get_result(result_path):
                     data_result_mean = data_result_all.groupby('num').mean()
                     max_num = int(list(data_result_mean.sort_values('f1_macro_Averaged').index)[-1])
 
-                    data_validation = pd.read_csv(save_path + '/result_validation_' + str(max_num) + '_new.csv', sep='\t',header=None)
-                    y_train = np.array(list(data_validation[0])[-2].split(',')).astype('int')
-                    y_test = np.array(list(data_validation[0])[-1].split(',')).astype('int')
+                    data_test = pd.read_csv(save_path + '/result_test_' + str(max_num) + '_new.csv', sep='\t',header=None)
+                    y_train = np.array(list(data_test[0])[-2].split(',')).astype('int')
+                    y_test = np.array(list(data_test[0])[-1].split(',')).astype('int')
 
                     predict_train_Averaged = np.zeros([len(y_train), y_num])
                     predict_test_Averaged = np.zeros([len(y_test), y_num])
                     predict_train_Weighted = np.zeros([len(y_train), y_num])
                     predict_test_Weighted = np.zeros([len(y_test), y_num])
                     for j in range(y_num):
-                        predict_train_Averaged_ = np.array(list(data_validation.iloc[j])[0].split(',')).astype('float')
+                        predict_train_Averaged_ = np.array(list(data_test.iloc[j])[0].split(',')).astype('float')
                         predict_train_Averaged[:, j] = predict_train_Averaged_
                     for j in range(y_num):
-                        predict_test_Averaged_ = np.array(list(data_validation.iloc[j + y_num])[0].split(',')).astype('float')
+                        predict_test_Averaged_ = np.array(list(data_test.iloc[j + y_num])[0].split(',')).astype('float')
                         predict_test_Averaged[:, j] = predict_test_Averaged_
                     for j in range(y_num):
-                        predict_train_Weighted_ = np.array(list(data_validation.iloc[j + y_num + y_num])[0].split(',')).astype('float')
+                        predict_train_Weighted_ = np.array(list(data_test.iloc[j + y_num + y_num])[0].split(',')).astype('float')
                         predict_train_Weighted[:, j] = predict_train_Weighted_
                     for j in range(y_num):
-                        predict_test_Weighted_ = np.array(list(data_validation.iloc[j + y_num + y_num + y_num])[0].split(',')).astype('float')
+                        predict_test_Weighted_ = np.array(list(data_test.iloc[j + y_num + y_num + y_num])[0].split(',')).astype('float')
                         predict_test_Weighted[:, j] = predict_test_Weighted_
 
                     predict_train_Averaged[np.isnan(predict_train_Averaged)] = 0.5
