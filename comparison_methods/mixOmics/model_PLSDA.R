@@ -25,8 +25,8 @@ mat3 <- read.table(matrix3, header = TRUE,row.names=1, check.names=FALSE, sep='\
 message('read class information: ', label_path)
 label_info <- read.table(label_path, check.names=FALSE, header = TRUE, sep='\t', as.is=TRUE)
 row.names(label_info) <- label_info[,'sample_id']
-sample_train<-label_info[label_info[datasets]!='validation','sample_id']
-sample_test<-label_info[label_info[datasets]=='validation','sample_id']
+sample_train<-label_info[label_info[datasets]!='test','sample_id']
+sample_test<-label_info[label_info[datasets]=='test','sample_id']
 y_train<-as.vector(label_info[sample_train,'y'])
 y_test<-as.vector(label_info[sample_test,'y'])
 ynum<-length(unique(y_train))
@@ -94,15 +94,5 @@ for (n in c(2,5,10)){
     data_all[ynum+ynum+ynum+ynum+3,1]<-str_c(as.vector(y_train),collapse=',')
     data_all[ynum+ynum+ynum+ynum+4,1]<-str_c(as.vector(y_test),collapse=',')
     write.table(data, file=paste(save_path,'result_cv_',n,'_new.csv',sep=''),row.names=FALSE,col.names=FALSE,sep='\t')
-    write.table(data_all, file=paste(save_path,'result_validation_',n,'_new.csv',sep=''),row.names=FALSE,col.names=FALSE,sep='\t')
+    write.table(data_all, file=paste(save_path,'result_test_',n,'_new.csv',sep=''),row.names=FALSE,col.names=FALSE,sep='\t')
 }
-
-#keepX_train <- list(RNA = c(50, 50), methylation = c(50,50), CNV = c(50, 50))
-
-
-
-
-
-
-
-
