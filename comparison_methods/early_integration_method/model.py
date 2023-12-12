@@ -162,7 +162,7 @@ def main_model(data_path, label_path, feature_name, dataset, method, num, save_p
     data = data.fillna(0)
 
     label = pd.read_csv(label_path, sep='\t')
-    sample_train = label.loc[label['dataset_' + str(dataset)] == 'train', 'sample_id']
+    sample_train = label.loc[label['dataset_' + str(dataset)] != 'test', 'sample_id']
     sample_test = label.loc[label['dataset_' + str(dataset)] == 'test', 'sample_id']
     label = label.set_index('sample_id')
 
