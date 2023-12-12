@@ -1,7 +1,7 @@
 library(mixOmics)
 library(stringr)
 require(caret)
-set.seed(1)
+set.seed(10)
 args<-commandArgs(TRUE)
 matrix1 <-args[1]
 matrix2 <-args[2]
@@ -9,7 +9,6 @@ matrix3 <-args[3]
 label_path <-args[4]
 dataset<-args[5]
 save_path<-args[6]
-
 
 
 datasets<-paste('dataset',dataset,sep='_')
@@ -50,49 +49,55 @@ X_test <- list(RNA = mat1_test,methylation = mat2_test,CNV = mat3_test)
 folds <- createFolds(y=sample_train,k=5)
 for (n in c(2,5,10)){
     print(n)
-    data <- array(0,dim=c(5,ynum+ynum+2))
-    data_all<- array(0,dim=c(ynum+ynum+ynum+ynum+4,1))
-    for(i in 1:5){
-    mat1_test_cv<-mat1_train[folds[[i]],]
-    mat1_train_cv<-mat1_train[-folds[[i]],]
-    mat2_test_cv<-mat2_train[folds[[i]],]
-    mat2_train_cv<-mat2_train[-folds[[i]],]
-    mat3_test_cv<-mat3_train[folds[[i]],]
-    mat3_train_cv<-mat3_train[-folds[[i]],]
-    y_test_cv<-y_train[folds[[i]]]
-    y_train_cv<-y_train[-folds[[i]]]
-    X_train_cv <- list(RNA = mat1_train_cv,methylation = mat2_train_cv,CNV = mat3_train_cv)
-    X_test_cv <- list(RNA = mat1_test_cv,methylation = mat2_test_cv,CNV = mat3_test_cv)
-    clf_cv <- block.plsda(X_train_cv, y_train_cv,design='full',ncomp=n)
-    predict_test_cv <- predict(clf_cv, newdata = X_test_cv,dist="max.dist")
-    AveragedPredict_test_cv<-predict_test_cv$AveragedPredict
-    WeightedPredict_test_cv<-predict_test_cv$WeightedPredict
-    AveragedPredict_test_cv_mean = apply(AveragedPredict_test_cv, c(1,2), mean)
-    WeightedPredict_test_cv_mean = apply(WeightedPredict_test_cv, c(1,2), mean)
-    for(s in 1:ynum){data[i,s]<-str_c(as.vector(AveragedPredict_test_cv_mean[,s]),collapse=',')}
-    for(s in 1:ynum){data[i,ynum+s]<-str_c(as.vector(WeightedPredict_test_cv_mean[,s]),collapse=',')}
-    data[i,ynum+ynum+1]<-str_c(as.vector(sample_train[folds[[i]]]),collapse=',')
-    data[i,ynum+ynum+2]<-str_c(as.vector(y_test_cv),collapse=',')
+    for (m in c(10,50,100,200,500)){
+        if ((m*n>dim(mat1_train)[2])|(m*n>dim(mat2_train)[2])|(m*n>dim(mat3_train)[2])){
+        print(m)
+        next}
+        keepX_train <- list(RNA = as.vector(matrix(m,n,1)), methylation = as.vector(matrix(m,n,1)), CNV = as.vector(matrix(m,n,1)))
+        data <- array(0,dim=c(5,ynum+ynum+2))
+        data_all<- array(0,dim=c(ynum+ynum+ynum+ynum+4,1))
+        for(i in 1:5){
+        mat1_test_cv<-mat1_train[folds[[i]],]
+        mat1_train_cv<-mat1_train[-folds[[i]],]
+        mat2_test_cv<-mat2_train[folds[[i]],]
+        mat2_train_cv<-mat2_train[-folds[[i]],]
+        mat3_test_cv<-mat3_train[folds[[i]],]
+        mat3_train_cv<-mat3_train[-folds[[i]],]
+        y_test_cv<-y_train[folds[[i]]]
+        y_train_cv<-y_train[-folds[[i]]]
+        X_train_cv <- list(RNA = mat1_train_cv,methylation = mat2_train_cv,CNV = mat3_train_cv)
+        X_test_cv <- list(RNA = mat1_test_cv,methylation = mat2_test_cv,CNV = mat3_test_cv)
+        clf_cv <- block.splsda(X_train_cv, y_train_cv,design='full',ncomp=n,keepX=keepX_train)
+        predict_test_cv <- predict(clf_cv, newdata = X_test_cv,dist="max.dist")
+        AveragedPredict_test_cv<-predict_test_cv$AveragedPredict
+        WeightedPredict_test_cv<-predict_test_cv$WeightedPredict
+        AveragedPredict_test_cv_mean = apply(AveragedPredict_test_cv, c(1,2), mean)
+        WeightedPredict_test_cv_mean = apply(WeightedPredict_test_cv, c(1,2), mean)
+        for(s in 1:ynum){data[i,s]<-str_c(as.vector(AveragedPredict_test_cv_mean[,s]),collapse=',')}
+        for(s in 1:ynum){data[i,ynum+s]<-str_c(as.vector(WeightedPredict_test_cv_mean[,s]),collapse=',')}
+        data[i,ynum+ynum+1]<-str_c(as.vector(sample_train[folds[[i]]]),collapse=',')
+        data[i,ynum+ynum+2]<-str_c(as.vector(y_test_cv),collapse=',')
+        }
+        clf<- block.splsda(X_train, y_train,design='full',ncomp=n,keepX=keepX_train)
+        Mypredict_train <- predict(clf, newdata = X_train, dist = "max.dist")
+        Mypredict_test <- predict(clf, newdata = X_test, dist = "max.dist")
+        AveragedPredict_train<-Mypredict_train$AveragedPredict
+        AveragedPredict_test<-Mypredict_test$AveragedPredict
+        WeightedPredict_train<-Mypredict_train$WeightedPredict
+        WeightedPredict_test<-Mypredict_test$WeightedPredict
+        AveragedPredict_train_mean = apply(AveragedPredict_train, c(1,2), mean)
+        WeightedPredict_train_mean = apply(WeightedPredict_train, c(1,2), mean)
+        AveragedPredict_test_mean = apply(AveragedPredict_test, c(1,2), mean)
+        WeightedPredict_test_mean = apply(WeightedPredict_test, c(1,2), mean)
+        for(s in 1:ynum){data_all[s,1]<-str_c(as.vector(AveragedPredict_train_mean[,s]),collapse=',')}
+        for(s in 1:ynum){data_all[ynum+s,1]<-str_c(as.vector(AveragedPredict_test_mean[,s]),collapse=',')}
+        for(s in 1:ynum){data_all[ynum+ynum+s,1]<-str_c(as.vector(WeightedPredict_train_mean[,s]),collapse=',')}
+        for(s in 1:ynum){data_all[ynum+ynum+ynum+s,1]<-str_c(as.vector(WeightedPredict_test_mean[,s]),collapse=',')}
+        data_all[ynum+ynum+ynum+ynum+1,1]<-str_c(as.vector(sample_train),collapse=',')
+        data_all[ynum+ynum+ynum+ynum+2,1]<-str_c(as.vector(sample_test),collapse=',')
+        data_all[ynum+ynum+ynum+ynum+3,1]<-str_c(as.vector(y_train),collapse=',')
+        data_all[ynum+ynum+ynum+ynum+4,1]<-str_c(as.vector(y_test),collapse=',')
+        write.table(data, file=paste(save_path,'result_cv_',n,'_',m,'_new.csv',sep=''),row.names=FALSE,col.names=FALSE,sep='\t')
+        write.table(data_all, file=paste(save_path,'result_test_',n,'_',m,'_new.csv',sep=''),row.names=FALSE,col.names=FALSE,sep='\t')
     }
-    clf<- block.plsda(X_train, y_train,design='full',ncomp=n)
-    Mypredict_train <- predict(clf, newdata = X_train, dist = "max.dist")
-    Mypredict_test <- predict(clf, newdata = X_test, dist = "max.dist")
-    AveragedPredict_train<-Mypredict_train$AveragedPredict
-    AveragedPredict_test<-Mypredict_test$AveragedPredict
-    WeightedPredict_train<-Mypredict_train$WeightedPredict
-    WeightedPredict_test<-Mypredict_test$WeightedPredict
-    AveragedPredict_train_mean = apply(AveragedPredict_train, c(1,2), mean)
-    WeightedPredict_train_mean = apply(WeightedPredict_train, c(1,2), mean)
-    AveragedPredict_test_mean = apply(AveragedPredict_test, c(1,2), mean)
-    WeightedPredict_test_mean = apply(WeightedPredict_test, c(1,2), mean)
-    for(s in 1:ynum){data_all[s,1]<-str_c(as.vector(AveragedPredict_train_mean[,s]),collapse=',')}
-    for(s in 1:ynum){data_all[ynum+s,1]<-str_c(as.vector(AveragedPredict_test_mean[,s]),collapse=',')}
-    for(s in 1:ynum){data_all[ynum+ynum+s,1]<-str_c(as.vector(WeightedPredict_train_mean[,s]),collapse=',')}
-    for(s in 1:ynum){data_all[ynum+ynum+ynum+s,1]<-str_c(as.vector(WeightedPredict_test_mean[,s]),collapse=',')}
-    data_all[ynum+ynum+ynum+ynum+1,1]<-str_c(as.vector(sample_train),collapse=',')
-    data_all[ynum+ynum+ynum+ynum+2,1]<-str_c(as.vector(sample_test),collapse=',')
-    data_all[ynum+ynum+ynum+ynum+3,1]<-str_c(as.vector(y_train),collapse=',')
-    data_all[ynum+ynum+ynum+ynum+4,1]<-str_c(as.vector(y_test),collapse=',')
-    write.table(data, file=paste(save_path,'result_cv_',n,'_new.csv',sep=''),row.names=FALSE,col.names=FALSE,sep='\t')
-    write.table(data_all, file=paste(save_path,'result_test_',n,'_new.csv',sep=''),row.names=FALSE,col.names=FALSE,sep='\t')
 }
