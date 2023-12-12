@@ -245,9 +245,9 @@ def main_model(data_path, label_path, feature_name, dataset, method, num, save_p
             result_auc.loc[i, 'f1_weighted_test'] = f1_weighted_test
             result_auc.loc[i, 'f1_macro_test'] = f1_macro_test
 
-    result_predict_train.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_train_' + feature_name + '.txt', sep='\t', index=False)
-    result_predict_test.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_test_' + feature_name + '.txt', sep='\t', index=False)
-    result_auc.to_csv(save_path + str(dataset) + '/' + str(method.split('_cv')[0]) + '/result_newnew_AUC_' + feature_name + '.txt',sep='\t', index=False)
+    result_predict_train.to_csv(save_path + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_train_' + feature_name + '.txt', sep='\t', index=False)
+    result_predict_test.to_csv(save_path  + '/' + str(method.split('_cv')[0]) + '/result_newnew_predict_test_' + feature_name + '.txt', sep='\t', index=False)
+    result_auc.to_csv(save_path  + '/' + str(method.split('_cv')[0]) + '/result_newnew_AUC_' + feature_name + '.txt',sep='\t', index=False)
 
 
 def main(args):
@@ -272,6 +272,3 @@ if __name__ == '__main__':
                         help='save_path', dest='save_path')
     args = parser.parse_args()
     main(args)
-
-
-
