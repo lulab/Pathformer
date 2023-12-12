@@ -281,8 +281,6 @@ def main_model(label_path, data_path, dataset, model_name, save_path, epoch_num,
 
     model = PathCNN(num_classes=num_y)
 
-
-    ####模型训练#####
     # optimizer
     optimizer = Adam(model.parameters(), lr=LEARNING_RATE)
     loss_fn = nn.CrossEntropyLoss(weight=class_weight)
@@ -336,7 +334,7 @@ def main_model(label_path, data_path, dataset, model_name, save_path, epoch_num,
             print('f1_weighted_train:', f1_weighted_train)
             print('f1_macro_train:', f1_macro_train)
 
-            ######模型测试########
+            ######模型验证########
             model.eval()
             running_loss = 0.0
             y_val = []
@@ -373,7 +371,7 @@ def main_model(label_path, data_path, dataset, model_name, save_path, epoch_num,
             print('f1_macro_val:', f1_macro_val)
             early_stopping([f1_macro_val], epoch)
 
-            ######模型验证#########
+            ######模型测试#########
             if epoch % VALIDATE_EVERY == 0:
                 model.eval()
                 running_loss = 0.0
@@ -410,7 +408,7 @@ def main_model(label_path, data_path, dataset, model_name, save_path, epoch_num,
                 print('auc_test:', AUC_test)
                 print('f1_weighted_test:', f1_weighted_test)
                 print('f1_macro_test:', f1_macro_test)
-
+            ######模型最终验证########
             if (early_stopping.early_stop) & (epoch >= stop):
                 model.eval()
                 running_loss = 0.0
@@ -521,7 +519,7 @@ def main_model(label_path, data_path, dataset, model_name, save_path, epoch_num,
             print('f1_macro_train_2:', f1_macro_train_2)
 
 
-            ######模型测试########
+            ######模型验证########
             model.eval()
             running_loss = 0.0
             y_val = []
@@ -576,7 +574,7 @@ def main_model(label_path, data_path, dataset, model_name, save_path, epoch_num,
             print('f1_macro_val_2:', f1_macro_val_2)
             early_stopping([f1_macro_val_2], epoch)
 
-            ######模型验证#########
+            ######模型测试#########
             if epoch % VALIDATE_EVERY == 0:
                 model.eval()
                 running_loss = 0.0
@@ -630,6 +628,7 @@ def main_model(label_path, data_path, dataset, model_name, save_path, epoch_num,
                 print('AUC_test_2:', AUC_test_2)
                 print('f1_weighted_test_2:', f1_weighted_test_2)
                 print('f1_macro_test_2:', f1_macro_test_2)
+            ######模型最终测试#########
             if (early_stopping.early_stop) & (epoch >= stop):
                 model.eval()
                 running_loss = 0.0
