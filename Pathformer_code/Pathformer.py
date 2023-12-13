@@ -44,11 +44,20 @@ class GEGLU(nn.Module):
         return x * F.gelu(gates)
 
 class Embedding_layer(nn.Module):
-    def __init__(self,feature_len,embeding):
+    def __init__(self, feature_len, embeding_dim):
         super(Embedding_layer, self).__init__()
-        self.M = torch.nn.Parameter(torch.tensor(scale(np.random.rand(feature_len, embeding))).float(), requires_grad=True)
+        self.M = torch.nn.Parameter(torch.tensor(scale(np.random.rand(feature_len, embeding_dim))).float(),
+                                    requires_grad=True)
+
     def forward(self, enc_inputs):  # X: [batch_size, feature_len,embeding_len]
-        X = enc_inputs * self.M
+        # print(enc_inputs.shape)
+        # print(self.M.shape)
+        if enc_inputs.shape[2]>2:
+            X=enc_inputs[:,:,0:1]* self.M
+            for i in range(1,enc_inputs.shape[2]):
+                X = torch.cat((X,enc_inputs[:,:,i:(i+1)] * self.M),2)
+        else:
+            X = enc_inputs * self.M
         return X
 
 class FeedForward(nn.Module):
@@ -288,6 +297,7 @@ class Evoformer(nn.Module):
             beta,
             attn_dropout=0.,
             ff_dropout=0.,
+            embeding_num=32,
 
     ):
         super().__init__()
@@ -301,8 +311,9 @@ class Evoformer(nn.Module):
         self.ff_dropout = ff_dropout
         self.beta=beta
         self.embeding = embeding
+        self.embeding_num=embeding_num
         if self.embeding:
-            self.embedding_layer = Embedding_layer(feature_len=self.col_dim, embeding=self.row_dim)
+            self.embedding_layer = Embedding_layer(feature_len=self.col_dim, embeding_dim=int(self.embeding_num/self.row_dim))
         self.layers = nn.ModuleList(
             [EvoformerBlock(row_dim=self.row_dim,col_dim=self.col_dim, heads=self.heads, dim_head=self.dim_head,beta=self.beta,
                               attn_dropout=self.attn_dropout, ff_dropout=self.ff_dropout) for _ in range(self.depth)])
@@ -364,15 +375,16 @@ class pathformer_model(nn.Module):
                  classifier_input,
                  classifier_dim,
                  label_dim,
-                 embeding,
                  beta,
                  attn_dropout,
                  ff_dropout,
-                 classifier_dropout):
+                 classifier_dropout,
+                 embeding=False,
+                 embeding_num=32):
         super(pathformer_model, self).__init__()
         self.pathway_model = CustomizedLinear(mask_raw, bias=None)
         self.Evoformer_model = Evoformer(depth=depth, dim_network=1, row_dim=row_dim,
-                                     col_dim=col_dim, heads=heads,dim_head=dim_head,embeding=embeding,
+                                     col_dim=col_dim, heads=heads,dim_head=dim_head,embeding=embeding,embeding_num=embeding_num,
                                      beta=beta,attn_dropout=attn_dropout,ff_dropout=ff_dropout)
         self.classifier_model = classifier(classifier_input, classifier_dim, label_dim, classifier_dropout)
 
