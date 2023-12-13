@@ -1,2 +1,0 @@
-AUC_discovery	AUC_validation	acc_discovery	auc_weighted_ovr_discovery	auc_weighted_ovo_discovery	auc_macro_ovr_discovery	auc_macro_ovo_discovery	f1_weighted_discovery	f1_macro_discovery	acc_validation	auc_weighted_ovr_validation	auc_weighted_ovo_validation	auc_macro_ovr_validation	auc_macro_ovo_validation	f1_weighted_validation	f1_macro_validation
-		1.0	1.0	1.0	1.0	1.0	1.0	1.0	0.8157894736842105	0.9416680787867062	0.9532670743672221	0.9599556727220125	0.9577699424209095	0.8044609777093076	0.7242818275635614
