@@ -68,6 +68,12 @@ bash MOGAT/log_MOGAT.sh
 bash PathCNN/main_log.sh
 ```
 
-### 12. Result
+### 12. P-NET
+
+```
+bash P_net/log_Pnet.sh
+```
+
+### 13. Result
 
 Here we take two classification tasks of breast cancer as an example, including breast cancer early- and late- stage classification, and breast cancer low- and high- survival risk classification.
