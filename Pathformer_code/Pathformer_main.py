@@ -33,11 +33,11 @@ def main_train_test_model(modal_all_path,modal_select_path,gene_all,gene_select,
     ###Sample data load
     label = pd.read_csv(label_path, sep='\t')
     train_sample=list(label.loc[label['dataset_' + str(dataset)+'_new'] == 'train', :].index)
-    test_sample=list(label.loc[label['dataset_' + str(dataset)+'_new'] == 'test', :].index)
+    validation_sample=list(label.loc[label['dataset_' + str(dataset)+'_new'] == 'validation', :].index)
     train_label = label.loc[train_sample, ['y']].values
     train_label = train_label.astype(int)
-    test_label = label.loc[test_sample, ['y']].values
-    test_label = test_label.astype(int)
+    validation_label = label.loc[validation_sample, ['y']].values
+    validation_label = validation_label.astype(int)
     data = np.load(file=data_path)
 
     gene_all_data = pd.read_csv(gene_all, header=None)
@@ -58,20 +58,20 @@ def main_train_test_model(modal_all_path,modal_select_path,gene_all,gene_select,
         modal_select_index = list(modal_all_data.loc[list(modal_select_data[0]), 'index'])
 
     data_train = data[train_sample, :, :][:, gene_select_index, :][:, :, modal_select_index]
-    data_test = data[test_sample, :, :][:, gene_select_index, :][:, :, modal_select_index]
+    data_validation = data[validation_sample, :, :][:, gene_select_index, :][:, :, modal_select_index]
 
     train_dataset = SCDataset(data_train, train_label)
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, num_workers=0, pin_memory=True)
-    test_dataset = SCDataset(data_test, test_label)
-    test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, num_workers=0, pin_memory=True)
+    val_dataset = SCDataset(data_validation, validation_label)
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, num_workers=0, pin_memory=True)
 
     if (test_each_epoch_no==1):
-        validation_sample = list(label.loc[label['dataset_' + str(dataset)] == 'validation', :].index)
-        validation_label = label.loc[validation_sample, ['y']].values
-        validation_label = validation_label.astype(int)
-        data_validation = data[validation_sample, :, :][:, gene_select_index, :][:, :, modal_select_index]
-        val_dataset = SCDataset(data_validation, validation_label)
-        val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, num_workers=0, pin_memory=True)
+        test_sample = list(label.loc[label['dataset_' + str(dataset)+'_new'] == 'test', :].index)
+        test_label = label.loc[test_sample, ['y']].values
+        test_label = test_label.astype(int)
+        data_test = data[test_sample, :, :][:, gene_select_index, :][:, :, modal_select_index]
+        test_dataset = SCDataset(data_test, test_label)
+        test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, num_workers=0, pin_memory=True)
 
     ###Pathway crosstalk netwark load
     gene_pathway = np.load(file=pathway_gene_w)
