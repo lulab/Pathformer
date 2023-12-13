@@ -17,7 +17,7 @@ from utils import *
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
-def main_validation(modal_all_path,modal_select_path,gene_all,gene_select,pathway_gene_w,pathway_crosstalk_network,
+def main_test(modal_all_path,modal_select_path,gene_all,gene_select,pathway_gene_w,pathway_crosstalk_network,
                     data_path,label_path,sample_name_path,model_path, save_path,label_dim,evaluate,
                     depth,heads,dim_head,beta, attn_dropout, ff_dropout, classifier_dropout):
 
@@ -48,14 +48,14 @@ def main_validation(modal_all_path,modal_select_path,gene_all,gene_select,pathwa
         modal_select_data = pd.read_csv(modal_select_path, header=None)
         modal_select_index = list(modal_all_data.loc[list(modal_select_data[0]), 'index'])
 
-    data_validation = data[:, :, :][:, gene_select_index, :][:, :, modal_select_index]
+    data_test = data[:, :, :][:, gene_select_index, :][:, :, modal_select_index]
     if sample_name_path is None:
-        sample_name=np.array(range(data_validation.shape[0]))
+        sample_name=np.array(range(data_test.shape[0]))
     else:
         sample_name=np.array(pd.read_csv(sample_name_path,sep='\t',header=None)[0])
 
-    val_dataset = SCDataset(data_validation,sample_name)
-    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, num_workers=0, pin_memory=True)
+    test_dataset = SCDataset(data_test,sample_name)
+    test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, num_workers=0, pin_memory=True)
 
     ###Pathway crosstalk netwark load
     gene_pathway = np.load(file=pathway_gene_w)
@@ -99,6 +99,7 @@ def main_validation(modal_all_path,modal_select_path,gene_all,gene_select,pathwa
                              classifier_dim=classifier_dim,
                              label_dim=label_dim,
                              embeding=embeding,
+                             embeding_num=embeding_num,
                              beta=beta,
                              attn_dropout=attn_dropout,
                              ff_dropout=ff_dropout,
@@ -113,88 +114,88 @@ def main_validation(modal_all_path,modal_select_path,gene_all,gene_select,pathwa
     ############ Model Validation ################
     ##############################################
     model.eval()
-    name_val = []
-    predict_val = np.zeros([len(sample_name), label_dim])
+    name_test = []
+    predict_test = np.zeros([len(sample_name), label_dim])
     with torch.no_grad():
-        for index, (data, name) in enumerate(val_loader):
+        for index, (data, name) in enumerate(test_loader):
             index += 1
             if index % 100 == 1:
                 print(index)
             data = data.to(device)
-            name_val.append(name[0])
+            name_test.append(name[0])
             pathway_network_batch = repeat(pathway_network, 'i j-> x i j', x=data.shape[0])
             logits = model(pathway_network_batch, data.permute(0, 2, 1), output_attentions=False)
             if (index) * BATCH_SIZE <= len(sample_name):
-                predict_val[(index - 1) * BATCH_SIZE:(index) * BATCH_SIZE, :] = logits.data.cpu().numpy()
+                predict_test[(index - 1) * BATCH_SIZE:(index) * BATCH_SIZE, :] = logits.data.cpu().numpy()
             else:
-                predict_val[(index - 1) * BATCH_SIZE:, :] = logits.data.cpu().numpy()
+                predict_test[(index - 1) * BATCH_SIZE:, :] = logits.data.cpu().numpy()
 
     predict_columns=[]
-    predict_data_val = pd.DataFrame(columns={'sample_id', 'predict_score_0'})
-    predict_data_val['sample_id'] = name_val
-    for i in range(predict_val.shape[1]):
-        predict_data_val['predict_score_'+str(i)] = np.array(predict_val)[:, i]
+    predict_data_test = pd.DataFrame(columns={'sample_id', 'predict_score_0'})
+    predict_data_test['sample_id'] = name_test
+    for i in range(predict_test.shape[1]):
+        predict_data_test['predict_score_'+str(i)] = np.array(predict_test)[:, i]
         predict_columns.append('predict_score_'+str(i))
-    predict_data_val=predict_data_val[['sample_id']+predict_columns]
-    predict_data_val.to_csv(save_path + '/predict_score.txt', sep='\t', index=False)
+    predict_data_test=predict_data_test[['sample_id']+predict_columns]
+    predict_data_test.to_csv(save_path + '/predict_score.txt', sep='\t', index=False)
 
     if evaluate:
         if label_path is None:
             print('Missing label data')
         else:
             label = pd.read_csv(label_path, sep='\t')
-            predict_data_val=pd.merge(predict_data_val,label,on='sample_id',how='left')
+            predict_data_test=pd.merge(predict_data_test,label,on='sample_id',how='left')
             if label_dim == 2:
                 f = open(save_path + '/result_predict_evaluate.txt', 'w')
-                ACC_val, AUC_val, f1_weighted_val, f1_macro_val = get_roc(np.array(predict_data_val['y']), np.array(predict_data_val['predict_score_1']))
+                ACC_test, AUC_test, f1_weighted_test, f1_macro_test = get_roc(np.array(predict_data_test['y']), np.array(predict_data_test['predict_score_1']))
                 # output
-                f.write('ACC_val:' + str(ACC_val) + '\n')
-                f.write('auc_val:' + str(AUC_val) + '\n')
-                f.write('f1_weighted_val:' + str(f1_weighted_val) + '\n')
-                f.write('f1_macro_val:' + str(f1_macro_val) + '\n')
-                print('ACC_val:', ACC_val)
-                print('auc_val:', AUC_val)
-                print('f1_weighted_val:', f1_weighted_val)
-                print('f1_macro_val:', f1_macro_val)
+                f.write('ACC_test:' + str(ACC_test) + '\n')
+                f.write('auc_test:' + str(AUC_test) + '\n')
+                f.write('f1_weighted_test:' + str(f1_weighted_test) + '\n')
+                f.write('f1_macro_test:' + str(f1_macro_test) + '\n')
+                print('ACC_test:', ACC_test)
+                print('auc_test:', AUC_test)
+                print('f1_weighted_test:', f1_weighted_test)
+                print('f1_macro_test:', f1_macro_test)
                 f.close()
             else:
-                y_val=np.array(predict_data_val['y'])
-                predict_val=np.array(predict_data_val[predict_columns])
+                y_test=np.array(predict_data_test['y'])
+                predict_test=np.array(predict_data_test[predict_columns])
                 f = open(save_path + '/result_predict_evaluate.txt', 'w')
-                acc_val, auc_weighted_ovr_val, auc_weighted_ovo_val, auc_macro_ovr_val, auc_macro_ovo_val, f1_weighted_val, f1_macro_val = get_roc_multi(y_val, predict_val)
-                y_val_new = np.array(y_val).copy()
-                y_val_new[y_val_new >= 1] = 1
-                ACC_val_2, AUC_val_2, f1_weighted_val_2, f1_macro_val_2 = get_roc(np.array(y_val_new),1 - np.array(predict_val)[:, 0])
+                acc_test, auc_weighted_ovr_test, auc_weighted_ovo_test, auc_macro_ovr_test, auc_macro_ovo_test, f1_weighted_test, f1_macro_test = get_roc_multi(y_test, predict_test)
+                y_test_new = np.array(y_test).copy()
+                y_test_new[y_test_new >= 1] = 1
+                ACC_test_2, AUC_test_2, f1_weighted_test_2, f1_macro_test_2 = get_roc(np.array(y_test_new),1 - np.array(predict_test)[:, 0])
 
                 # output
-                f.write('acc_val:' + str(acc_val) + '\n')
-                f.write('auc_weighted_ovr_val:' + str(auc_weighted_ovr_val) + '\n')
-                f.write('auc_weighted_ovo_val:' + str(auc_weighted_ovo_val) + '\n')
-                f.write('auc_macro_ovr_val:' + str(auc_macro_ovr_val) + '\n')
-                f.write('auc_macro_ovo_val:' + str(auc_macro_ovo_val) + '\n')
-                f.write('f1_weighted_val:' + str(f1_weighted_val) + '\n')
-                f.write('f1_macro_val:' + str(f1_macro_val) + '\n')
-                f.write('ACC_val_2:' + str(ACC_val_2) + '\n')
-                f.write('AUC_val_2:' + str(AUC_val_2) + '\n')
-                f.write('f1_weighted_val_2:' + str(f1_weighted_val_2) + '\n')
-                f.write('f1_macro_val_2:' + str(f1_macro_val_2) + '\n')
-                print('acc_val:', acc_val)
-                print('auc_weighted_ovr_val:', auc_weighted_ovr_val)
-                print('auc_weighted_ovo_val:', auc_weighted_ovo_val)
-                print('auc_macro_ovr_val:', auc_macro_ovr_val)
-                print('auc_macro_ovo_val:', auc_macro_ovo_val)
-                print('f1_weighted_val:', f1_weighted_val)
-                print('f1_macro_val:', f1_macro_val)
-                print('ACC_val_2:', ACC_val_2)
-                print('AUC_val_2:', AUC_val_2)
-                print('f1_weighted_val_2:', f1_weighted_val_2)
-                print('f1_macro_val_2:', f1_macro_val_2)
+                f.write('acc_test:' + str(acc_test) + '\n')
+                f.write('auc_weighted_ovr_test:' + str(auc_weighted_ovr_test) + '\n')
+                f.write('auc_weighted_ovo_test:' + str(auc_weighted_ovo_test) + '\n')
+                f.write('auc_macro_ovr_test:' + str(auc_macro_ovr_test) + '\n')
+                f.write('auc_macro_ovo_test:' + str(auc_macro_ovo_test) + '\n')
+                f.write('f1_weighted_test:' + str(f1_weighted_test) + '\n')
+                f.write('f1_macro_test:' + str(f1_macro_test) + '\n')
+                f.write('ACC_test_2:' + str(ACC_test_2) + '\n')
+                f.write('AUC_test_2:' + str(AUC_test_2) + '\n')
+                f.write('f1_weighted_test_2:' + str(f1_weighted_test_2) + '\n')
+                f.write('f1_macro_test_2:' + str(f1_macro_test_2) + '\n')
+                print('acc_test:', acc_test)
+                print('auc_weighted_ovr_test:', auc_weighted_ovr_test)
+                print('auc_weighted_ovo_test:', auc_weighted_ovo_test)
+                print('auc_macro_ovr_test:', auc_macro_ovr_test)
+                print('auc_macro_ovo_test:', auc_macro_ovo_test)
+                print('f1_weighted_test:', f1_weighted_test)
+                print('f1_macro_test:', f1_macro_test)
+                print('ACC_test_2:', ACC_test_2)
+                print('AUC_test_2:', AUC_test_2)
+                print('f1_weighted_test_2:', f1_weighted_test_2)
+                print('f1_macro_test_2:', f1_macro_test_2)
                 f.close()
 
 
 
 def main(args):
-    main_validation(args.modal_all_path,args.modal_select_path,args.gene_all, args.gene_select, args.pathway_gene_w, args.pathway_crosstalk_network,
+    main_test(args.modal_all_path,args.modal_select_path,args.gene_all, args.gene_select, args.pathway_gene_w, args.pathway_crosstalk_network,
                     args.data_path, args.label_path, args.sample_name_path,args.model_path, args.save_path, args.label_dim, args.evaluate,
                     args.depth, args.heads, args.dim_head, args.beta, args.attn_dropout, args.ff_dropout, args.classifier_dropout)
 
