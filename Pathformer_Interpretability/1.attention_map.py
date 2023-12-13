@@ -60,19 +60,19 @@ def get_attention_map(modal_all_path,modal_select_path,gene_all,gene_select,path
         modal_select_index = list(modal_all_data.loc[list(modal_select_data[0]), 'index'])
 
     label = pd.read_csv(label_path, sep='\t')
-    train_sample = list(label.loc[label['dataset_' + str(dataset) + '_test'] == 'train', :].index)
-    test_sample = list(label.loc[label['dataset_' + str(dataset) + '_test'] == 'test', :].index)
-    validation_sample = list(label.loc[label['dataset_' + str(dataset)] == 'validation', :].index)
+    train_sample = list(label.loc[label['dataset_' + str(dataset) + '_new'] == 'train', :].index)
+    validation_sample = list(label.loc[label['dataset_' + str(dataset)+ '_new'] == 'validation', :].index)
+    test_sample = list(label.loc[label['dataset_' + str(dataset) + '_new'] == 'test', :].index)
     train_label = label.loc[train_sample, ['y']].values
     train_label = train_label.astype(int)
-    test_label = label.loc[test_sample, ['y']].values
-    test_label = test_label.astype(int)
     validation_label = label.loc[validation_sample, ['y']].values
     validation_label = validation_label.astype(int)
+    test_label = label.loc[test_sample, ['y']].values
+    test_label = test_label.astype(int)
 
     data = np.load(file=data_path)
-    data = data[train_sample + test_sample + validation_sample, :, :][:, gene_select_index, :][:, :, modal_select_index]
-    label_all = np.concatenate([train_label, test_label, validation_label])
+    data = data[train_sample + validation_sample + test_sample, :, :][:, gene_select_index, :][:, :, modal_select_index]
+    label_all = np.concatenate([train_label, validation_label, test_label])
     data_dataset = SCDataset(data, label_all)
     data_loader = DataLoader(data_dataset, batch_size=BATCH_SIZE, num_workers=0, pin_memory=True, shuffle=False)
 
@@ -119,6 +119,7 @@ def get_attention_map(modal_all_path,modal_select_path,gene_all,gene_select,path
                              classifier_dim=classifier_dim,
                              label_dim=label_dim,
                              embeding=embeding,
+                             embeding_num=embeding_num,
                              beta=beta,
                              attn_dropout=attn_dropout,
                              ff_dropout=ff_dropout,
