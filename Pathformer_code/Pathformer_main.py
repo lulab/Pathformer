@@ -19,7 +19,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 def main_train_test_model(modal_all_path,modal_select_path,gene_all,gene_select,pathway_gene_w,pathway_crosstalk_network,
                           data_path,label_path, save_path,dataset,model_name,model_save,batch_size,gradient_num,epoch_num,
-                          early_stopping_type,patience, delta,stop_epoch,validation_each_epoch_no,depth,heads,dim_head,beta, attn_dropout,
+                          early_stopping_type,patience, delta,stop_epoch,test_each_epoch_no,depth,heads,dim_head,beta, attn_dropout,
                           ff_dropout, classifier_dropout, lr_max,lr_min):
     #######################
     if not os.path.exists(save_path):
@@ -32,9 +32,8 @@ def main_train_test_model(modal_all_path,modal_select_path,gene_all,gene_select,
     #############################
     ###Sample data load
     label = pd.read_csv(label_path, sep='\t')
-    discovery_sample= list(label.loc[label['dataset_' + str(dataset)] == 'discovery', :].index)
-    train_sample=list(label.loc[label['dataset_' + str(dataset)+'_test'] == 'train', :].index)
-    test_sample=list(label.loc[label['dataset_' + str(dataset)+'_test'] == 'test', :].index)
+    train_sample=list(label.loc[label['dataset_' + str(dataset)+'_new'] == 'train', :].index)
+    test_sample=list(label.loc[label['dataset_' + str(dataset)+'_new'] == 'test', :].index)
     train_label = label.loc[train_sample, ['y']].values
     train_label = train_label.astype(int)
     test_label = label.loc[test_sample, ['y']].values
@@ -66,7 +65,7 @@ def main_train_test_model(modal_all_path,modal_select_path,gene_all,gene_select,
     test_dataset = SCDataset(data_test, test_label)
     test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, num_workers=0, pin_memory=True)
 
-    if (validation_each_epoch_no==1):
+    if (test_each_epoch_no==1):
         validation_sample = list(label.loc[label['dataset_' + str(dataset)] == 'validation', :].index)
         validation_label = label.loc[validation_sample, ['y']].values
         validation_label = validation_label.astype(int)
@@ -98,7 +97,7 @@ def main_train_test_model(modal_all_path,modal_select_path,gene_all,gene_select,
     N_PRJ = data_train.shape[2]  # length of gene embedding
     N_GENE = data_train.shape[1] # number of gene
     col_dim = gene_pathway.shape[1]
-    if N_PRJ==1:
+    if N_PRJ<=2:
         embeding=True
         embeding_num = 32
         row_dim=embeding_num
@@ -124,6 +123,7 @@ def main_train_test_model(modal_all_path,modal_select_path,gene_all,gene_select,
                         classifier_dim=classifier_dim,
                         label_dim=label_dim,
                         embeding=embeding,
+                        embeding_num=embeding_num,
                         beta=beta,
                         attn_dropout=attn_dropout,
                         ff_dropout=ff_dropout,
@@ -138,7 +138,7 @@ def main_train_test_model(modal_all_path,modal_select_path,gene_all,gene_select,
     early_stopping = EarlyStopping(patience=patience, verbose=False, delta=delta,stop=stop_epoch)
 
     ##############################################
-    ###### Model Training & Test & Validation ####
+    ###### Model Training & Validation & Test ####
     ##############################################
     if label_dim == 2:
         f = open(save_path + '/result.txt', 'w')
@@ -193,13 +193,13 @@ def main_train_test_model(modal_all_path,modal_select_path,gene_all,gene_select,
             print('f1_macro_train:', f1_macro_train)
             print('lr:', lr_epoch)
 
-            ###### Model Test ########
+            ###### Model Validation ########
             model.eval()
             running_loss = 0.0
-            y_test = []
-            predict_test = np.zeros([len(test_sample), label_dim])
+            y_val = []
+            predict_val = np.zeros([len(validation_sample), label_dim])
             with torch.no_grad():
-                for index, (data, labels) in enumerate(test_loader):
+                for index, (data, labels) in enumerate(val_loader):
                     index += 1
                     if index % 100 == 1:
                         print(index)
@@ -210,34 +210,34 @@ def main_train_test_model(modal_all_path,modal_select_path,gene_all,gene_select,
                     logits = model(pathway_network_batch, data.permute(0, 2, 1), output_attentions=False)
                     loss = loss_fn(logits, labels)
                     running_loss += loss.item()
-                    y_test.extend(labels.tolist())
-                    if (index) * BATCH_SIZE <= len(test_sample):
-                        predict_test[(index - 1) * BATCH_SIZE:(index) * BATCH_SIZE, :] = logits.data.cpu().numpy()
+                    y_val.extend(labels.tolist())
+                    if (index) * BATCH_SIZE <= len(validation_sample):
+                        predict_val[(index - 1) * BATCH_SIZE:(index) * BATCH_SIZE, :] = logits.data.cpu().numpy()
                     else:
-                        predict_test[(index - 1) * BATCH_SIZE:, :] = logits.data.cpu().numpy()
-            test_loss = running_loss / index
-            ACC_test, AUC_test, f1_weighted_test, f1_macro_test = get_roc(np.array(y_test),np.array(predict_test)[:, 1])
+                        predict_val[(index - 1) * BATCH_SIZE:, :] = logits.data.cpu().numpy()
+            val_loss = running_loss / index
+            ACC_val, AUC_val, f1_weighted_val, f1_macro_val = get_roc(np.array(y_val), np.array(predict_val)[:, 1])
 
             # output
-            f.write(f' ==  Epoch: {epoch} | test Loss: {test_loss:.6f}' + '\n')
-            f.write('ACC_test:' + str(ACC_test) + '\n')
-            f.write('auc_test:' + str(AUC_test) + '\n')
-            f.write('f1_weighted_test:' + str(f1_weighted_test) + '\n')
-            f.write('f1_macro_test:' + str(f1_macro_test) + '\n')
-            print(f' ==  Epoch: {epoch} | test Loss: {test_loss:.6f}')
-            print('ACC_test:', ACC_test)
-            print('auc_test:', AUC_test)
-            print('f1_weighted_test:', f1_weighted_test)
-            print('f1_macro_test:', f1_macro_test)
+            f.write(f' ==  Epoch: {epoch} | val Loss: {val_loss:.6f}' + '\n')
+            f.write('ACC_val:' + str(ACC_val) + '\n')
+            f.write('auc_val:' + str(AUC_val) + '\n')
+            f.write('f1_weighted_val:' + str(f1_weighted_val) + '\n')
+            f.write('f1_macro_val:' + str(f1_macro_val) + '\n')
+            print(f' ==  Epoch: {epoch} | val Loss: {val_loss:.6f}')
+            print('ACC_val:', ACC_val)
+            print('auc_val:', AUC_val)
+            print('f1_weighted_val:', f1_weighted_val)
+            print('f1_macro_val:', f1_macro_val)
 
-            ###### Model Validation ########
-            if (validation_each_epoch_no==1):
+            ###### Model Test ########
+            if (test_each_epoch_no==1):
                 model.eval()
                 running_loss = 0.0
-                y_val = []
-                predict_val = np.zeros([len(validation_sample), label_dim])
+                y_test = []
+                predict_test = np.zeros([len(test_sample), label_dim])
                 with torch.no_grad():
-                    for index, (data, labels) in enumerate(val_loader):
+                    for index, (data, labels) in enumerate(test_loader):
                         index += 1
                         if index % 100 == 1:
                             print(index)
@@ -248,31 +248,32 @@ def main_train_test_model(modal_all_path,modal_select_path,gene_all,gene_select,
                         logits = model(pathway_network_batch, data.permute(0, 2, 1), output_attentions=False)
                         loss = loss_fn(logits, labels)
                         running_loss += loss.item()
-                        y_val.extend(labels.tolist())
-                        if (index) * BATCH_SIZE <= len(validation_sample):
-                            predict_val[(index - 1) * BATCH_SIZE:(index) * BATCH_SIZE, :] = logits.data.cpu().numpy()
+                        y_test.extend(labels.tolist())
+                        if (index) * BATCH_SIZE <= len(test_sample):
+                            predict_test[(index - 1) * BATCH_SIZE:(index) * BATCH_SIZE, :] = logits.data.cpu().numpy()
                         else:
-                            predict_val[(index - 1) * BATCH_SIZE:, :] = logits.data.cpu().numpy()
-                val_loss = running_loss / index
-                ACC_val, AUC_val, f1_weighted_val, f1_macro_val = get_roc(np.array(y_val), np.array(predict_val)[:, 1])
+                            predict_test[(index - 1) * BATCH_SIZE:, :] = logits.data.cpu().numpy()
+                test_loss = running_loss / index
+                ACC_test, AUC_test, f1_weighted_test, f1_macro_test = get_roc(np.array(y_test),
+                                                                              np.array(predict_test)[:, 1])
 
                 # output
-                f.write(f' ==  Epoch: {epoch} | val Loss: {val_loss:.6f}' + '\n')
-                f.write('ACC_val:' + str(ACC_val) + '\n')
-                f.write('auc_val:' + str(AUC_val) + '\n')
-                f.write('f1_weighted_val:' + str(f1_weighted_val) + '\n')
-                f.write('f1_macro_val:' + str(f1_macro_val) + '\n')
-                print(f' ==  Epoch: {epoch} | val Loss: {val_loss:.6f}')
-                print('ACC_val:', ACC_val)
-                print('auc_val:', AUC_val)
-                print('f1_weighted_val:', f1_weighted_val)
-                print('f1_macro_val:', f1_macro_val)
-            
+                f.write(f' ==  Epoch: {epoch} | test Loss: {test_loss:.6f}' + '\n')
+                f.write('ACC_test:' + str(ACC_test) + '\n')
+                f.write('auc_test:' + str(AUC_test) + '\n')
+                f.write('f1_weighted_test:' + str(f1_weighted_test) + '\n')
+                f.write('f1_macro_test:' + str(f1_macro_test) + '\n')
+                print(f' ==  Epoch: {epoch} | test Loss: {test_loss:.6f}')
+                print('ACC_test:', ACC_test)
+                print('auc_test:', AUC_test)
+                print('f1_weighted_test:', f1_weighted_test)
+                print('f1_macro_test:', f1_macro_test)
+
             ####### early_stopping ######
             if (early_stopping_type=='f1_macro')|(early_stopping_type=='f1_macro_2'):
-                early_stopping_score=f1_macro_test
+                early_stopping_score=f1_macro_val
             elif (early_stopping_type=='AUC')|(early_stopping_type=='AUC_2'):
-                early_stopping_score = AUC_test
+                early_stopping_score = AUC_val
 
             early_stopping([early_stopping_score], epoch)
             if model_save&(epoch>stop_epoch-5)&(early_stopping.save_epoch) :
@@ -355,10 +356,10 @@ def main_train_test_model(modal_all_path,modal_select_path,gene_all,gene_select,
             ###### Model Test ########
             model.eval()
             running_loss = 0.0
-            y_test = []
-            predict_test = np.zeros([len(test_sample), label_dim])
+            y_val = []
+            predict_val = np.zeros([len(validation_sample), label_dim])
             with torch.no_grad():
-                for index, (data, labels) in enumerate(test_loader):
+                for index, (data, labels) in enumerate(val_loader):
                     index += 1
                     if index % 100 == 1:
                         print(index)
@@ -369,51 +370,53 @@ def main_train_test_model(modal_all_path,modal_select_path,gene_all,gene_select,
                     logits = model(pathway_network_batch, data.permute(0, 2, 1), output_attentions=False)
                     loss = loss_fn(logits, labels)
                     running_loss += loss.item()
-                    y_test.extend(labels.tolist())
-                    if (index) * BATCH_SIZE <= len(test_sample):
-                        predict_test[(index - 1) * BATCH_SIZE:(index) * BATCH_SIZE, :] = logits.data.cpu().numpy()
+                    y_val.extend(labels.tolist())
+                    if (index) * BATCH_SIZE <= len(validation_sample):
+                        predict_val[(index - 1) * BATCH_SIZE:(index) * BATCH_SIZE, :] = logits.data.cpu().numpy()
                     else:
-                        predict_test[(index - 1) * BATCH_SIZE:, :] = logits.data.cpu().numpy()
-            test_loss = running_loss / index
-            acc_test, auc_weighted_ovr_test, auc_weighted_ovo_test, auc_macro_ovr_test, auc_macro_ovo_test, f1_weighted_test, f1_macro_test = get_roc_multi(np.array(y_test), predict_test)
-            y_test_new = np.array(y_test).copy()
-            y_test_new[y_test_new >= 1] = 1
-            ACC_test_2, AUC_test_2, f1_weighted_test_2, f1_macro_test_2 = get_roc(np.array(y_test_new),1 - np.array(predict_test)[:, 0])
-            
+                        predict_val[(index - 1) * BATCH_SIZE:, :] = logits.data.cpu().numpy()
+            val_loss = running_loss / index
+            acc_val, auc_weighted_ovr_val, auc_weighted_ovo_val, auc_macro_ovr_val, auc_macro_ovo_val, f1_weighted_val, f1_macro_val = get_roc_multi(
+                np.array(y_val), predict_val)
+            y_val_new = np.array(y_val).copy()
+            y_val_new[y_val_new >= 1] = 1
+            ACC_val_2, AUC_val_2, f1_weighted_val_2, f1_macro_val_2 = get_roc(np.array(y_val_new),
+                                                                              1 - np.array(predict_val)[:, 0])
+
             # output
-            f.write(f' ==  Epoch: {epoch} | test Loss: {test_loss:.6f}' + '\n')
-            f.write('acc_test:' + str(acc_test) + '\n')
-            f.write('auc_weighted_ovr_test:' + str(auc_weighted_ovr_test) + '\n')
-            f.write('auc_weighted_ovo_test:' + str(auc_weighted_ovo_test) + '\n')
-            f.write('auc_macro_ovr_test:' + str(auc_macro_ovr_test) + '\n')
-            f.write('auc_macro_ovo_test:' + str(auc_macro_ovo_test) + '\n')
-            f.write('f1_weighted_test:' + str(f1_weighted_test) + '\n')
-            f.write('f1_macro_test:' + str(f1_macro_test) + '\n')
-            f.write('ACC_test_2:' + str(ACC_test_2) + '\n')
-            f.write('AUC_test_2:' + str(AUC_test_2) + '\n')
-            f.write('f1_weighted_test_2:' + str(f1_weighted_test_2) + '\n')
-            f.write('f1_macro_test_2:' + str(f1_macro_test_2) + '\n')
-            print(f' ==  Epoch: {epoch} | test Loss: {test_loss:.6f}')
-            print('acc_test:', acc_test)
-            print('auc_weighted_ovr_test:', auc_weighted_ovr_test)
-            print('auc_weighted_ovo_test:', auc_weighted_ovo_test)
-            print('auc_macro_ovr_test:', auc_macro_ovr_test)
-            print('auc_macro_ovo_test:', auc_macro_ovo_test)
-            print('f1_weighted_test:', f1_weighted_test)
-            print('f1_macro_test:', f1_macro_test)
-            print('ACC_test_2:', ACC_test_2)
-            print('AUC_test_2:', AUC_test_2)
-            print('f1_weighted_test_2:', f1_weighted_test_2)
-            print('f1_macro_test_2:', f1_macro_test_2)
+            f.write(f' ==  Epoch: {epoch} | val Loss: {val_loss:.6f}' + '\n')
+            f.write('acc_val:' + str(acc_val) + '\n')
+            f.write('auc_weighted_ovr_val:' + str(auc_weighted_ovr_val) + '\n')
+            f.write('auc_weighted_ovo_val:' + str(auc_weighted_ovo_val) + '\n')
+            f.write('auc_macro_ovr_val:' + str(auc_macro_ovr_val) + '\n')
+            f.write('auc_macro_ovo_val:' + str(auc_macro_ovo_val) + '\n')
+            f.write('f1_weighted_val:' + str(f1_weighted_val) + '\n')
+            f.write('f1_macro_val:' + str(f1_macro_val) + '\n')
+            f.write('ACC_val_2:' + str(ACC_val_2) + '\n')
+            f.write('AUC_val_2:' + str(AUC_val_2) + '\n')
+            f.write('f1_weighted_val_2:' + str(f1_weighted_val_2) + '\n')
+            f.write('f1_macro_val_2:' + str(f1_macro_val_2) + '\n')
+            print(f' ==  Epoch: {epoch} | val Loss: {val_loss:.6f}')
+            print('acc_val:', acc_val)
+            print('auc_weighted_ovr_val:', auc_weighted_ovr_val)
+            print('auc_weighted_ovo_val:', auc_weighted_ovo_val)
+            print('auc_macro_ovr_val:', auc_macro_ovr_val)
+            print('auc_macro_ovo_val:', auc_macro_ovo_val)
+            print('f1_weighted_val:', f1_weighted_val)
+            print('f1_macro_val:', f1_macro_val)
+            print('ACC_val_2:', ACC_val_2)
+            print('AUC_val_2:', AUC_val_2)
+            print('f1_weighted_val_2:', f1_weighted_val_2)
+            print('f1_macro_val_2:', f1_macro_val_2)
 
             ###### Model Validation ########
-            if (validation_each_epoch_no==1):
+            if (test_each_epoch_no==1):
                 model.eval()
                 running_loss = 0.0
-                y_val = []
-                predict_val = np.zeros([len(validation_sample), label_dim])
+                y_test = []
+                predict_test = np.zeros([len(test_sample), label_dim])
                 with torch.no_grad():
-                    for index, (data, labels) in enumerate(val_loader):
+                    for index, (data, labels) in enumerate(test_loader):
                         index += 1
                         if index % 100 == 1:
                             print(index)
@@ -424,53 +427,55 @@ def main_train_test_model(modal_all_path,modal_select_path,gene_all,gene_select,
                         logits = model(pathway_network_batch, data.permute(0, 2, 1), output_attentions=False)
                         loss = loss_fn(logits, labels)
                         running_loss += loss.item()
-                        y_val.extend(labels.tolist())
-                        if (index) * BATCH_SIZE <= len(validation_sample):
-                            predict_val[(index - 1) * BATCH_SIZE:(index) * BATCH_SIZE, :] = logits.data.cpu().numpy()
+                        y_test.extend(labels.tolist())
+                        if (index) * BATCH_SIZE <= len(test_sample):
+                            predict_test[(index - 1) * BATCH_SIZE:(index) * BATCH_SIZE, :] = logits.data.cpu().numpy()
                         else:
-                            predict_val[(index - 1) * BATCH_SIZE:, :] = logits.data.cpu().numpy()
-                val_loss = running_loss / index
-                acc_val, auc_weighted_ovr_val, auc_weighted_ovo_val, auc_macro_ovr_val, auc_macro_ovo_val, f1_weighted_val, f1_macro_val = get_roc_multi(
-                    np.array(y_val), predict_val)
-                y_val_new = np.array(y_val).copy()
-                y_val_new[y_val_new >= 1] = 1
-                ACC_val_2, AUC_val_2, f1_weighted_val_2, f1_macro_val_2 = get_roc(np.array(y_val_new), 1 - np.array(predict_val)[:, 0])
+                            predict_test[(index - 1) * BATCH_SIZE:, :] = logits.data.cpu().numpy()
+                test_loss = running_loss / index
+                acc_test, auc_weighted_ovr_test, auc_weighted_ovo_test, auc_macro_ovr_test, auc_macro_ovo_test, f1_weighted_test, f1_macro_test = get_roc_multi(
+                    np.array(y_test), predict_test)
+                y_test_new = np.array(y_test).copy()
+                y_test_new[y_test_new >= 1] = 1
+                ACC_test_2, AUC_test_2, f1_weighted_test_2, f1_macro_test_2 = get_roc(np.array(y_test_new),
+                                                                                      1 - np.array(predict_test)[:, 0])
 
                 # output
-                f.write(f' ==  Epoch: {epoch} | val Loss: {val_loss:.6f}' + '\n')
-                f.write('acc_val:' + str(acc_val) + '\n')
-                f.write('auc_weighted_ovr_val:' + str(auc_weighted_ovr_val) + '\n')
-                f.write('auc_weighted_ovo_val:' + str(auc_weighted_ovo_val) + '\n')
-                f.write('auc_macro_ovr_val:' + str(auc_macro_ovr_val) + '\n')
-                f.write('auc_macro_ovo_val:' + str(auc_macro_ovo_val) + '\n')
-                f.write('f1_weighted_val:' + str(f1_weighted_val) + '\n')
-                f.write('f1_macro_val:' + str(f1_macro_val) + '\n')
-                f.write('ACC_val_2:' + str(ACC_val_2) + '\n')
-                f.write('AUC_val_2:' + str(AUC_val_2) + '\n')
-                f.write('f1_weighted_val_2:' + str(f1_weighted_val_2) + '\n')
-                f.write('f1_macro_val_2:' + str(f1_macro_val_2) + '\n')
-                print(f' ==  Epoch: {epoch} | val Loss: {val_loss:.6f}')
-                print('acc_val:', acc_val)
-                print('auc_weighted_ovr_val:', auc_weighted_ovr_val)
-                print('auc_weighted_ovo_val:', auc_weighted_ovo_val)
-                print('auc_macro_ovr_val:', auc_macro_ovr_val)
-                print('auc_macro_ovo_val:', auc_macro_ovo_val)
-                print('f1_weighted_val:', f1_weighted_val)
-                print('f1_macro_val:', f1_macro_val)
-                print('ACC_val_2:', ACC_val_2)
-                print('AUC_val_2:', AUC_val_2)
-                print('f1_weighted_val_2:', f1_weighted_val_2)
-                print('f1_macro_val_2:', f1_macro_val_2)
+                f.write(f' ==  Epoch: {epoch} | test Loss: {test_loss:.6f}' + '\n')
+                f.write('acc_test:' + str(acc_test) + '\n')
+                f.write('auc_weighted_ovr_test:' + str(auc_weighted_ovr_test) + '\n')
+                f.write('auc_weighted_ovo_test:' + str(auc_weighted_ovo_test) + '\n')
+                f.write('auc_macro_ovr_test:' + str(auc_macro_ovr_test) + '\n')
+                f.write('auc_macro_ovo_test:' + str(auc_macro_ovo_test) + '\n')
+                f.write('f1_weighted_test:' + str(f1_weighted_test) + '\n')
+                f.write('f1_macro_test:' + str(f1_macro_test) + '\n')
+                f.write('ACC_test_2:' + str(ACC_test_2) + '\n')
+                f.write('AUC_test_2:' + str(AUC_test_2) + '\n')
+                f.write('f1_weighted_test_2:' + str(f1_weighted_test_2) + '\n')
+                f.write('f1_macro_test_2:' + str(f1_macro_test_2) + '\n')
+                print(f' ==  Epoch: {epoch} | test Loss: {test_loss:.6f}')
+                print('acc_test:', acc_test)
+                print('auc_weighted_ovr_test:', auc_weighted_ovr_test)
+                print('auc_weighted_ovo_test:', auc_weighted_ovo_test)
+                print('auc_macro_ovr_test:', auc_macro_ovr_test)
+                print('auc_macro_ovo_test:', auc_macro_ovo_test)
+                print('f1_weighted_test:', f1_weighted_test)
+                print('f1_macro_test:', f1_macro_test)
+                print('ACC_test_2:', ACC_test_2)
+                print('AUC_test_2:', AUC_test_2)
+                print('f1_weighted_test_2:', f1_weighted_test_2)
+                print('f1_macro_test_2:', f1_macro_test_2)
+
                 
             ####### early_stopping ######
             if (early_stopping_type=='f1_macro'):
-                early_stopping_score=f1_macro_test
+                early_stopping_score=f1_macro_val
             elif (early_stopping_type=='f1_macro_2'):
-                early_stopping_score = f1_macro_test_2
+                early_stopping_score = f1_macro_val_2
             elif (early_stopping_type=='AUC'):
-                early_stopping_score = AUC_test
+                early_stopping_score = AUC_val
             elif (early_stopping_type=='AUC_2'):
-                early_stopping_score = AUC_test_2
+                early_stopping_score = AUC_val_2
 
             early_stopping([early_stopping_score], epoch)
 
@@ -484,7 +489,7 @@ def main_train_test_model(modal_all_path,modal_select_path,gene_all,gene_select,
 def main(args):
 
     main_train_test_model(args.modal_all_path,args.modal_select_path,args.gene_all,args.gene_select,args.pathway_gene_w,args.pathway_crosstalk_network,args.data_path,args.label_path, args.save_path,
-                   args.dataset,args.model_name,args.model_save,args.batch_size,args.gradient_num,args.epoch_num,args.early_stopping_type,args.patience, args.delta,args.stop_epoch,args.validation_each_epoch_no,
+                   args.dataset,args.model_name,args.model_save,args.batch_size,args.gradient_num,args.epoch_num,args.early_stopping_type,args.patience, args.delta,args.stop_epoch,args.test_each_epoch_no,
                    args.depth,args.heads,args.dim_head,args.beta, args.attn_dropout, args.ff_dropout, args.classifier_dropout, args.lr_max,args.lr_min)
 
 
@@ -528,8 +533,8 @@ if __name__ == '__main__':
                         help='delta', dest='delta')
     parser.add_argument('--stop_epoch', type=int, required=True,
                         help='stop_epoch', dest='stop_epoch')
-    parser.add_argument('--validation_each_epoch_no', type=int, required=True,
-                        help='validation_each_epoch_no', dest='validation_each_epoch_no')
+    parser.add_argument('--test_each_epoch_no', type=int, required=True,
+                        help='test_each_epoch_no', dest='test_each_epoch_no')
     parser.add_argument('--depth', type=int, required=True,
                         help='depth', dest='depth')
     parser.add_argument('--heads', type=int, required=True,
