@@ -17,7 +17,7 @@ python3 Pathformer_main.py \
 --batch_size 16 \
 --gradient_num 3 \
 --epoch_num 2000 \
---early_stopping_type f1_macro \
+--early_stopping_type f1_macro_2 \
 --patience 10 \
 --delta 1e-2 \
 --stop_epoch 0 \
@@ -49,7 +49,7 @@ python3 Pathformer_main.py \
 --batch_size 16 \
 --gradient_num 3 \
 --epoch_num 2000 \
---early_stopping_type f1_macro \
+--early_stopping_type f1_macro_2 \
 --patience 10 \
 --delta 1e-2 \
 --stop_epoch 0 \
