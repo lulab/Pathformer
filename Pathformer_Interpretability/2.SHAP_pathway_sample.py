@@ -41,6 +41,7 @@ def get_shap_pathway_sample(modal_all_path, modal_select_path, gene_all, gene_se
                      classifier_dim,
                      label_dim,
                      embeding,
+                     embeding_num,
                      beta,
                      attn_dropout,
                      ff_dropout,
@@ -48,7 +49,7 @@ def get_shap_pathway_sample(modal_all_path, modal_select_path, gene_all, gene_se
             super(pathformer_model, self).__init__()
             self.pathway_model = CustomizedLinear(mask_raw, bias=None)
             self.Evoformer_model = Evoformer(depth=depth, dim_network=1, row_dim=row_dim,
-                                         col_dim=col_dim, heads=heads,dim_head=dim_head,embeding=embeding,
+                                         col_dim=col_dim, heads=heads,dim_head=dim_head,embeding=embeding,embeding_num=embeding_num,
                                          beta=beta,attn_dropout=attn_dropout,ff_dropout=ff_dropout)
             self.classifier_model = classifier(classifier_input, classifier_dim, label_dim, classifier_dropout)
 
@@ -90,19 +91,19 @@ def get_shap_pathway_sample(modal_all_path, modal_select_path, gene_all, gene_se
 
     label = pd.read_csv(label_path, sep='\t')
     train_sample = list(label.loc[label['dataset_' + str(dataset) + '_test'] == 'train', :].index)
-    test_sample = list(label.loc[label['dataset_' + str(dataset) + '_test'] == 'test', :].index)
     validation_sample = list(label.loc[label['dataset_' + str(dataset)] == 'validation', :].index)
+    test_sample = list(label.loc[label['dataset_' + str(dataset) + '_test'] == 'test', :].index)
     train_label = label.loc[train_sample, ['y']].values
     train_label = train_label.astype(int)
-    test_label = label.loc[test_sample, ['y']].values
-    test_label = test_label.astype(int)
     validation_label = label.loc[validation_sample, ['y']].values
     validation_label = validation_label.astype(int)
+    test_label = label.loc[test_sample, ['y']].values
+    test_label = test_label.astype(int)
 
 
     data = np.load(file=data_path)
-    data = data[train_sample + test_sample + validation_sample, :, :][:, gene_select_index, :][:, :, modal_select_index]
-    label_all = np.concatenate([train_label, test_label, validation_label])
+    data = data[train_sample+ validation_sample + test_sample , :, :][:, gene_select_index, :][:, :, modal_select_index]
+    label_all = np.concatenate([train_label, validation_label, test_label])
     data_dataset = SCDataset(data, label_all)
     train_loader = DataLoader(data_dataset, batch_size=40, num_workers=0, pin_memory=True, shuffle=True)
     test_loader = DataLoader(data_dataset, batch_size=1, num_workers=0, pin_memory=True, shuffle=False)
@@ -148,6 +149,7 @@ def get_shap_pathway_sample(modal_all_path, modal_select_path, gene_all, gene_se
                              classifier_dim=classifier_dim,
                              label_dim=label_dim,
                              embeding=embeding,
+                             embeding_num=embeding_num,
                              beta=beta,
                              attn_dropout=attn_dropout,
                              ff_dropout=ff_dropout,
@@ -170,7 +172,7 @@ def get_shap_pathway_sample(modal_all_path, modal_select_path, gene_all, gene_se
     shap_all = h5py.File(save_path+'/shap_pathway_all.h5', 'a')
     for i in range(label_dim):
         shap_all.create_group('group'+'_'+str(i))
-    y_val = []
+    y_all = []
 
     model.eval()
     for batch_index, (data, labels) in enumerate(test_loader):
@@ -182,10 +184,10 @@ def get_shap_pathway_sample(modal_all_path, modal_select_path, gene_all, gene_se
         shap_= explainer.shap_values(data.permute(0, 2, 1), nsamples=N_SAMPLES)
         for i in range(len(shap_)):
             shap_all['group'+'_'+str(i)][str(batch_index)]=shap_[i]
-        y_val.append(y.tolist())
+        y_all.append(y.tolist())
 
 
-    np.save(file=save_path + '/data_label_SHAP_pathway.npy', arr=np.array(y_val))
+    np.save(file=save_path + '/data_label_SHAP_pathway.npy', arr=np.array(y_all))
     shap_all.close()
 
 def main(args):
