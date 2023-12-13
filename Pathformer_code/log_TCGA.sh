@@ -2,15 +2,15 @@
 
 cd /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/Pathformer_code
 python3 Pathformer_main.py \
---modal_all_path /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/3.data_gene_embedding/merge/merge_data_stage/modal_type_all.txt \
---modal_select_path /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/3.data_gene_embedding/merge/merge_data_stage/modal_type_all.txt \
---gene_all /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/reference/gene_all.txt \
---gene_select /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/reference/Pathformer_select_gene.txt \
---pathway_gene_w /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/reference/Pathformer_pathway_gene_weight.npy \
---pathway_crosstalk_network  /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/reference/Pathformer_pathway_crosstalk_network_matrix.npy \
---data_path /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/3.data_gene_embedding/merge/merge_data_stage/data_all.npy \
---label_path /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/2.sample_id/sample_cross_stage_new_final.txt \
---save_path /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/Result/BRCA_stage/ \
+--modal_all_path ../Result/BRCA_stage/modal_type_all.txt \
+--modal_select_path ../Result/BRCA_stage/modal_type_all.txt \
+--gene_all ../reference/gene_all.txt \
+--gene_select ../reference/Pathformer_select_gene.txt \
+--pathway_gene_w ../reference/Pathformer_pathway_gene_weight.npy \
+--pathway_crosstalk_network  ../reference/Pathformer_pathway_crosstalk_network_matrix.npy \
+--data_path ../data_TCGA/3.data_gene_embedding/merge/merge_data_stage/data_all.npy \
+--label_path ../data_TCGA/2.sample_id/sample_cross_stage.txt \
+--save_path ../Result/BRCA_stage/ \
 --dataset 1 \
 --model_name BRCA_stage \
 --model_save True \
@@ -32,47 +32,17 @@ python3 Pathformer_main.py \
 --lr_max 1e-5 \
 --lr_min 1e-8
 
-python3 Pathformer_main.py \
---modal_all_path /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/3.data_gene_embedding/merge/merge_data_subtype/modal_type_all.txt \
---modal_select_path /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/3.data_gene_embedding/merge/merge_data_subtype/modal_type_all.txt \
---gene_all /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/reference/gene_all.txt \
---gene_select /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/reference/Pathformer_select_gene.txt \
---pathway_gene_w /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/reference/Pathformer_pathway_gene_weight.npy \
---pathway_crosstalk_network  /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/reference/Pathformer_pathway_crosstalk_network_matrix.npy \
---data_path /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/3.data_gene_embedding/merge/merge_data_subtype/data_all.npy \
---label_path /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/2.sample_id/sample_cross_subtype_new_final.txt \
---save_path /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/Result/BRCA_subtype/ \
---dataset 1 \
---model_name BRCA_subtype \
---model_save True \
---batch_size 16 \
---gradient_num 3 \
---epoch_num 2000 \
---early_stopping_type f1_macro \
---patience 10 \
---delta 1e-2 \
---stop_epoch 0 \
---validation_each_epoch_no 1 \
---depth 3 \
---heads  8 \
---dim_head 32 \
---beta 1 \
---attn_dropout 0.2 \
---ff_dropout 0.2 \
---classifier_dropout 0.3 \
---lr_max 1e-5 \
---lr_min 1e-8
 
 python3 Pathformer_main.py \
---modal_all_path /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/3.data_gene_embedding/merge/merge_data_survival/modal_type_all.txt \
---modal_select_path /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/3.data_gene_embedding/merge/merge_data_survival/modal_type_all.txt \
---gene_all /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/reference/gene_all.txt \
---gene_select /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/reference/Pathformer_select_gene.txt \
---pathway_gene_w /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/reference/Pathformer_pathway_gene_weight.npy \
---pathway_crosstalk_network  /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/reference/Pathformer_pathway_crosstalk_network_matrix.npy \
---data_path /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/3.data_gene_embedding/merge/merge_data_survival/data_all.npy \
---label_path /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/data_TCGA/2.sample_id/sample_cross_survival_new_final.txt \
---save_path /apps/home/lulab_liuxiaofan/qhsky/project/multi_omics_paper/Result/BRCA_survival/ \
+--modal_all_path ../Result/BRCA_survival/modal_type_all.txt \
+--modal_select_path ../Result/BRCA_survival/modal_type_all.txt \
+--gene_all ../reference/gene_all.txt \
+--gene_select ../reference/Pathformer_select_gene.txt \
+--pathway_gene_w ../reference/Pathformer_pathway_gene_weight.npy \
+--pathway_crosstalk_network  ../reference/Pathformer_pathway_crosstalk_network_matrix.npy \
+--data_path ../data_TCGA/3.data_gene_embedding/merge/merge_data_survival/data_all.npy \
+--label_path ../data_TCGA/2.sample_id/sample_cross_survival.txt \
+--save_path ../Result/BRCA_survival/ \
 --dataset 1 \
 --model_name BRCA_survival \
 --model_save True \
