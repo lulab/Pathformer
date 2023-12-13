@@ -1,6 +1,6 @@
 # Liquid biopsy data
 
-We used three types of body fluid datasets: the plasma dataset, the extracellular vesicle (EV) dataset, and the platelet dataset. Liquid biopsies data preprocessing process can be seen in the folder: */data_preprocessing_cfRNA*.
+We used two types of body fluid datasets: the plasma dataset and the platelet dataset. Liquid biopsies data preprocessing process can be seen in the folder: */data_preprocessing_cfRNA*.
 
 The following shows the directory tree of data folder. Due to storage space limitations on Github, data can be  downloaded from these links (链接: https://pan.baidu.com/s/15K1tyV1Skrb7KEcDkCSPSw 提取码: c5nh). If you have any question, please contact xf-liu19@mails.tsinghua.edu.cn.
 
