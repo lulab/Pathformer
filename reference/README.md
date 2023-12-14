@@ -1,6 +1,6 @@
 # Reference files
 
-The following shows the directory tree of data folder. Due to storage space limitations on Github, only part of data is shown, other data can be  downloaded from these links. If you have any question, please contact xf-liu19@mails.tsinghua.edu.cn.
+The following shows the directory tree of data folder. Due to storage space limitations on Github, only part of data is shown, other data can be  downloaded from these links (链接: https://pan.baidu.com/s/1LUSd-aHVJUZqpZZ43ic8ug 提取码: 3q2b). If you have any question, please contact xf-liu19@mails.tsinghua.edu.cn.
 
 ```
 +--snp6.na35.remap.hg38.subset.marker_file.txt
