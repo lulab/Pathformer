@@ -1,6 +1,6 @@
 # Result of Pathformer
 
-The following shows the directory tree of result folder. Due to storage space limitations on Github, only part of data is shown, other data can be downloaded from these links (链接: https://pan.baidu.com/s/1LUSd-aHVJUZqpZZ43ic8ug 提取码: 3q2b). If you have any question, please contact xf-liu19@mails.tsinghua.edu.cn.
+The following shows the directory tree of result folder. Due to storage space limitations on Github, only part of data is shown, other data can be downloaded from these links (链接: https://pan.baidu.com/s/1XuF22QkBsczMZWlqj0UKyA 提取码: gd9m). If you have any question, please contact xf-liu19@mails.tsinghua.edu.cn.
 
 ```
 +--BRCA_stage
