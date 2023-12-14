@@ -166,13 +166,13 @@ python3 Pathformer_predict.py \
 
 #### 3.2 Examples of Pathformer model test for the EV dataset classification
 
-For liquid biopsy data,the training function is the same as TCGA data, but the parameter inputs are different. Here we take the EV dataset as an example, three modalities are selected as Pathformer's input in in the EV dataset.
+For liquid biopsy data,the training function is the same as TCGA data, but the parameter inputs are different. Here we take the plasma dataset as an example.
 
 ```
 cd Pathformer_code
 python3 Pathformer_main.py \
 --modal_all_path ../Result/plasma/modal_type_all.txt \
---modal_select_path ../Result/plasma/modal_select.txt \
+--modal_select_path ../Result/plasma/modal_type_all.txt \
 --gene_all ../reference/gene_mRNA_cfRNA.txt \
 --gene_select ../reference/Pathformer_select_gene.txt \
 --pathway_gene_w ../reference/Pathformer_pathway_gene_weight.npy \
