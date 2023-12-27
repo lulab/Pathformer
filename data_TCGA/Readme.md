@@ -2,7 +2,7 @@
 
 Here we take the breast cancer as an example, including the data of breast cancer early- and late- stage classification, breast cancer low- and high- survival risk classification, and breast cancer subtype classification. Breast cancer data preprocessing process can be seen in the folder: **/data_preprocessing_TCGA** and **/comparison_methods/data_feature_filter**.
 
-The following shows the directory tree of data folder. Due to storage space limitations on Github, data can be  downloaded from these links (链接: https://pan.baidu.com/s/1_-BjFkLdJOiD0m53VuvxMg 提取码: mco2). If you have any question, please contact xf-liu19@mails.tsinghua.edu.cn.
+The following shows the directory tree of data folder. Due to storage space limitations on Github, data can be  downloaded from these links (https://zenodo.org/records/10432145). If you have any question, please contact xf-liu19@mails.tsinghua.edu.cn.
 
 ```
 +--1.raw_data
